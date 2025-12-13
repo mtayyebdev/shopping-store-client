@@ -6,21 +6,21 @@ function Input({
   label = false,
   name = "",
   labelText = "",
-  value,
-  onchange,
   classes,
   size = "sm",
   placeholder = "",
+  parentClass,
+  ...props
 }) {
   const [openEye, setOpenEye] = useState(false);
   const sizes = {
     sm: "text-sm p-1 rounded-md",
-    lg: "text-base p-1 rounded-lg",
-    xl: "text-base p-2 rounded-xl",
-    full: "text-base px-2 py-1 rounded-full",
+    lg: "text-base p-1 rounded-md",
+    xl: "text-base p-2 rounded-lg",
+    full: "text-base px-4 py-1.5 rounded-full",
   };
   return (
-    <div className="flex flex-col">
+    <div className={`flex flex-col ${parentClass}`}>
       {label && (
         <label className="text-sm text-gray-950" htmlFor={name}>
           {labelText}
@@ -28,17 +28,20 @@ function Input({
       )}
       <div className="input flex items-center relative">
         <input
-          type={type=="password"?openEye?"text":"password":type}
+          type={type == "password" ? (openEye ? "text" : "password") : type}
           name={name}
           id={name}
-          className={`outline-none border border-gray-500 w-full focus:border-blue-500 focus:border-2 ${sizes[size]} ${classes}`}
+          className={`outline-none border border-gray-500 w-full focus:border-blue-500 focus:ring-2 ring-blue-500 transition-all ${sizes[size]} ${classes}`}
           placeholder={placeholder}
-          value={value}
-          onChange={(e) => onchange(e.target)}
+          {...props}
         />
         {type == "password" ? (
           <span className="absolute right-3 text-xl hover:text-blue-500 cursor-pointer">
-            {openEye?<LuEyeOff onClick={()=>setOpenEye(false)}/>:<LuEye onClick={()=>setOpenEye(true)}/>}
+            {openEye ? (
+              <LuEyeOff onClick={() => setOpenEye(false)} />
+            ) : (
+              <LuEye onClick={() => setOpenEye(true)} />
+            )}
           </span>
         ) : (
           ""
