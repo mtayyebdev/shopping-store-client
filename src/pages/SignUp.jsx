@@ -69,10 +69,10 @@ function SignUp() {
 
   return (
     <>
-      <div className="container-full bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center flex-col w-full h-screen">
-        <h2 className="text-3xl font-semibold mb-10">Shopping store</h2>
-        <div className="max-w-md w-full bg-white dark:bg-gray-700 rounded-2xl py-6 pb-7 px-6 shadow-lg">
-          <h2 className="text-2xl font-semibold">Create Account</h2>
+      <div className="container-full py-10 bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center flex-col w-full min-h-screen p-4">
+        <h2 className="text-3xl font-semibold mb-6">Shopping</h2>
+        <div className="max-w-md w-full bg-white dark:bg-gray-700 rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
+          <h2 className="text-xl sm:text-2xl font-semibold">Create Account</h2>
           <Input
             value={data.username}
             onChange={handleChange}
@@ -111,7 +111,7 @@ function SignUp() {
               {error}
             </p>
           )}
-          <div className="text-center mt-6">
+          <div className="mt-6 flex justify-center">
             <Button
               size="md"
               value="SignUp"
@@ -155,7 +155,7 @@ function SignUp() {
                   {error}
                 </p>
               )}
-              <div className="text-center mt-6">
+              <div className="mt-6 flex justify-center">
                 <Button
                   size="md"
                   value="Verify"

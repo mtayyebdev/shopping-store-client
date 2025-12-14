@@ -29,7 +29,7 @@ export default function ForgotPassword() {
     return (
       <div className="min-h-screen bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div className="bg-white rounded-2xl shadow-lg py-6 px-4 text-center">
             <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full animate-bounce">
               <LuCheck className="w-10 h-10 text-green-600" />
             </div>
@@ -63,10 +63,10 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center py-10 px-4">
       <div className="w-full max-w-md">
-       <h2 className="text-3xl font-semibold mb-10 text-center">Shopping store</h2>
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+       <h2 className="text-3xl font-semibold mb-10 text-center">Shopping</h2>
+        <div className="bg-white rounded-2xl shadow-lg py-6 px-4">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">
               Forgot Password?

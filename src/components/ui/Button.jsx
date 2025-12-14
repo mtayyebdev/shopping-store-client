@@ -4,15 +4,18 @@ function Button({
   size = "md",
   link = "",
   value = "",
-  style = "simple",
+  style = "",
   rounded = false,
   classes = "",
+  icon = null,
+  iconPosition = "left",
+  paddings = true,
   ...props
 }) {
   const sizes = {
-    sm: "py-1.5 px-5 text-sm",
-    md: "py-2 px-6 text-base",
-    lg: "py-3 px-10 text-lg",
+    sm: `${paddings ? "py-1.5 px-5" : ""} text-sm`,
+    md: `${paddings ? "py-2 px-6" : ""} text-base`,
+    lg: `${paddings ? "py-3 px-10" : ""} text-lg`,
   };
   const styles = {
     base: `bg-blue-500 border border-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75`,
@@ -24,18 +27,34 @@ function Button({
       {link ? (
         <a href={link} className={`cursor-pointer`}>
           <button
-            className={`cursor-pointer ${styles[style]} ${classes} ${rounded ? "rounded-full" : ""} ${sizes[size]}`}
+            className={`cursor-pointer flex justify-center ${styles[style]} ${classes} ${
+              rounded ? "rounded-full" : ""
+            } ${sizes[size]}`}
             {...props}
           >
+            {icon && iconPosition === "left" && (
+              <span className="mr-2">{icon}</span>
+            )}
             {value}
+            {icon && iconPosition === "right" && (
+              <span className="ml-2">{icon}</span>
+            )}
           </button>
         </a>
       ) : (
         <button
-          className={`cursor-pointer ${styles[style]} ${classes} ${rounded ? "rounded-full" : ""} ${sizes[size]}`}
+          className={`cursor-pointer flex justify-center ${styles[style]} ${classes} ${
+            rounded ? "rounded-full" : ""
+          } ${sizes[size]}`}
           {...props}
         >
+          {icon && iconPosition === "left" && (
+            <span className="mr-2">{icon}</span>
+          )}
           {value}
+          {icon && iconPosition === "right" && (
+            <span className="ml-2">{icon}</span>
+          )}
         </button>
       )}
     </div>
