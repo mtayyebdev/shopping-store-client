@@ -39,7 +39,7 @@ function HeroSwiper() {
         navigation={true}
         modules={[Autoplay, Pagination, Navigation]}
         onAutoplayTimeLeft={onAutoplayTimeLeft}
-        className="mySwiper"
+        className="hero-swiper"
       >
         {images.map((imgSrc, index) => (
           <SwiperSlide key={index}>
@@ -60,13 +60,13 @@ function HeroSwiper() {
 
       <style>
         {`/* Swiper styles */
-.swiper {
+.hero-swiper {
   width: 100%;
   height: 250px;
   margin: 15px 0;
 }
 
-.swiper-slide {
+.hero-swiper .swiper-slide {
   text-align: center;
   font-size: 18px;
   background: #444;
@@ -77,14 +77,14 @@ function HeroSwiper() {
   align-items: center;
 }
 
-.swiper-slide img {
+.hero-swiper .swiper-slide img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.autoplay-progress {
+.hero-swiper .autoplay-progress {
   position: absolute;
   right: 16px;
   bottom: 16px;
@@ -98,7 +98,7 @@ function HeroSwiper() {
   color: var(--swiper-theme-color);
 }
 
-.autoplay-progress svg {
+.hero-swiper .autoplay-progress svg {
   --progress: 0;
   position: absolute;
   left: 0;
@@ -113,23 +113,23 @@ function HeroSwiper() {
   stroke-dasharray: 125.6;
   transform: rotate(-90deg);
 }
-.swiper-button-next,
-.swiper-button-prev {
+.hero-swiper .swiper-button-next,
+.hero-swiper .swiper-button-prev {
   background-color: white;
   height: 80px !important;
   width: 40px !important;
   top: 45% !important;
   border-radius: 5px !important;
 }
-.swiper-button-next {
+.hero-swiper .swiper-button-next {
   right: -5px !important;
 }
-.swiper-button-prev {
+.hero-swiper .swiper-button-prev {
   left: -5px !important;
 }
 
-.swiper-button-next .swiper-navigation-icon,
-.swiper-button-prev .swiper-navigation-icon {
+.hero-swiper .swiper-button-next .swiper-navigation-icon,
+.hero-swiper .swiper-button-prev .swiper-navigation-icon {
   fill: gray !important;
   height: 20px !important;
   width: 20px !important;

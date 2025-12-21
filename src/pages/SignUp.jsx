@@ -69,10 +69,10 @@ function SignUp() {
 
   return (
     <>
-      <div className="container-full py-10 bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center flex-col w-full min-h-screen p-4">
+      <div className="container-full py-10 bg-secondary flex items-center justify-center flex-col w-full min-h-screen p-4">
         <h2 className="text-3xl font-semibold mb-6">Shopping</h2>
-        <div className="max-w-md w-full bg-white dark:bg-gray-700 rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
-          <h2 className="text-xl sm:text-2xl font-semibold">Create Account</h2>
+        <div className="max-w-md w-full bg-bg rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
+          <h2 className="text-xl sm:text-2xl font-semibold">Create an account</h2>
           <Input
             value={data.username}
             onChange={handleChange}
@@ -107,7 +107,7 @@ function SignUp() {
             parentClass={"mt-3"}
           />
           {error && (
-            <p className="mb-2 mt-2 text-sm text-red-600 animate-shake">
+            <p className="mb-2 mt-2 text-sm text-secondary2 animate-shake">
               {error}
             </p>
           )}
@@ -116,6 +116,7 @@ function SignUp() {
               size="md"
               value="SignUp"
               style="base"
+              bg="btn2"
               rounded
               classes="font-semibold w-[150px]"
               onClick={registerHanlder}
@@ -124,14 +125,14 @@ function SignUp() {
         </div>
         <p className="mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
+          <Link to="/login" className="text-secondary2 hover:underline">
             Login
           </Link>
         </p>
       </div>
       {popup && (
         <div className="popup w-full h-full fixed top-0 left-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-[350px] dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <div className="bg-bg w-[350px] p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-1">Email Verification</h2>
             <p>We send 6 digits OTP to your email for confirmation.</p>
             <div className="mt-7">
@@ -146,12 +147,12 @@ function SignUp() {
                     value={otp[index]}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="w-10 h-10 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-10 h-10 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-btn1/60"
                   />
                 ))}
               </div>
               {error && (
-                <p className="mb-2 mt-2 text-sm text-red-600 animate-shake">
+                <p className="mb-2 mt-2 text-sm text-secondary2 animate-shake">
                   {error}
                 </p>
               )}
@@ -160,6 +161,7 @@ function SignUp() {
                   size="md"
                   value="Verify"
                   style="base"
+                  bg="btn2"
                   rounded
                   classes="font-semibold w-[150px]"
                   onClick={handleVerifyOtp}

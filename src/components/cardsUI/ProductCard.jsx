@@ -2,7 +2,7 @@ import { LuHeart, LuStar } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
-export default function ProductCard({ product, save = true, ratings = true }) {
+export default function ProductCard({ product, save = true, ratings = true,classes="" }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -18,8 +18,7 @@ export default function ProductCard({ product, save = true, ratings = true }) {
     discount: 40,
     rating: 4.5,
     reviews: 128,
-    inStock: true,
-    badge: "Best Seller", // Can be "New", "Hot", "Sale", "Best Seller", etc.
+    inStock: true
   };
 
   const productData = product || defaultProduct;
@@ -32,14 +31,14 @@ export default function ProductCard({ product, save = true, ratings = true }) {
 
   return (
     <Link to={`/product/${productData.id}`}>
-      <div className="group bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+      <div className={`group bg-white ${classes} overflow-hidden`}>
         {/* Image Container */}
         <div className="relative overflow-hidden bg-gray-100">
           {/* Discount Badge */}
           {productData.discount > 0 && (
-            <div className="absolute top-1.5 right-1.5 md:top-3 md:right-3 z-10">
-              <span className="bg-green-600 text-white px-1.5 py-0.5 md:px-2 md:py-1 text-[10px] md:text-xs font-bold rounded-md">
-                {productData.discount}% OFF
+            <div className="absolute top-1.5 left-1.5 md:top-2 md:left-3 z-10">
+              <span className="bg-secondary2 text-text px-1.5 py-0.5 md:px-2 md:py-1 text-[10px] md:text-xs font-bold rounded-md">
+                {productData.discount}%
               </span>
             </div>
           )}
@@ -47,10 +46,10 @@ export default function ProductCard({ product, save = true, ratings = true }) {
           {save && (
             <button
               onClick={handleWishlist}
-              className={`p-2 md:p-3 rounded-full absolute top-8 right-1.5 md:top-11 md:right-3 z-10 transition-all duration-300 transform hover:scale-110 shadow-lg ${
+              className={`p-2 rounded-full absolute top-1.5 right-1.5 md:top-2 md:right-3 z-10 transition-all duration-300 transform hover:scale-110 shadow-lg ${
                 isWishlisted
-                  ? "bg-red-600 text-white"
-                  : "bg-white text-gray-900 hover:bg-red-600 hover:text-white"
+                  ? "bg-secondary2 text-white"
+                  : "bg-white text-gray-900 hover:bg-secondary2 hover:text-white"
               }`}
               title="Add to Wishlist"
             >
@@ -71,7 +70,7 @@ export default function ProductCard({ product, save = true, ratings = true }) {
               src={productData.image}
               alt={productData.name}
               onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ${
+              className={`w-full rounded h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -79,48 +78,27 @@ export default function ProductCard({ product, save = true, ratings = true }) {
         </div>
 
         {/* Product Info */}
-        <div className="p-2 md:p-4">
-          {/* Rating */}
-          {ratings && (
-            <div className="flex items-center gap-1 mb-1 md:mb-2">
-              <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, index) => (
-                  <LuStar
-                    key={index}
-                    className={`w-3 h-3 md:w-4 md:h-4 ${
-                      index < Math.floor(productData.rating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-[10px] md:text-sm text-gray-600">
-                {productData.rating}
-              </span>
-            </div>
-          )}
-
+        <div className="mt-2">
           {/* Product Name */}
-          <h3 className="text-gray-900 font-semibold text-xs md:text-base mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
+          <h3 className="text-text2 font-semibold text-xs md:text-base line-clamp-2">
             {productData.name}
           </h3>
 
           {/* Price Section */}
-          <div className="flex items-center gap-1 md:gap-2 flex-wrap">
-            <span className="text-base md:text-2xl font-bold text-gray-900">
-              ₹{productData.price.toLocaleString()}
+          <div className="flex items-center gap-1 mt-1 md:gap-2 flex-wrap">
+            <span className="text-base font-semibold text-secondary2">
+              Rs.{productData.price.toLocaleString()}
             </span>
             {productData.originalPrice &&
               productData.originalPrice > productData.price && (
                 <>
-                  <span className="text-[10px] md:text-sm text-gray-400 line-through">
-                    ₹{productData.originalPrice.toLocaleString()}
+                  <span className="text-[10px] md:text-sm text-text1 line-through">
+                    Rs.{productData.originalPrice.toLocaleString()}
                   </span>
                 </>
               )}
           </div>
-          {/* Badge */}
+          {/* Badge
           {productData?.badge && (
             <div className="mt-1">
               <span
@@ -137,7 +115,28 @@ export default function ProductCard({ product, save = true, ratings = true }) {
                 {productData.badge}
               </span>
             </div>
+          )} */}
+          {/* Rating */}
+          {ratings && (
+            <div className="flex items-center gap-1 mt-1">
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, index) => (
+                  <LuStar
+                    key={index}
+                    className={`w-3 h-3 md:w-4 md:h-4 ${
+                      index < Math.floor(productData.rating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-text1"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] md:text-sm text-text1">
+                ({productData.rating})
+              </span>
+            </div>
           )}
+
         </div>
       </div>
     </Link>

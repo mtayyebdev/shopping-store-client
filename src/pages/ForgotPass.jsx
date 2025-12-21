@@ -27,24 +27,24 @@ export default function ForgotPassword() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-lg py-6 px-4 text-center">
-            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full animate-bounce">
-              <LuCheck className="w-10 h-10 text-green-600" />
+          <div className="bg-bg rounded-2xl shadow-lg py-6 px-4 text-center">
+            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-btn1/20 rounded-full animate-bounce">
+              <LuCheck className="w-10 h-10 text-btn1" />
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl font-bold text-text2 mb-3">
               Check Your Email
             </h2>
 
-            <p className="text-gray-600 mb-2">
+            <p className="text-text1 mb-2">
               We've sent a password reset link to
             </p>
 
-            <p className="text-blue-600 font-semibold mb-6">{email}</p>
+            <p className="text-secondary2 font-semibold mb-6">{email}</p>
 
-            <p className="text-sm text-gray-500 mb-8">
+            <p className="text-sm text-text1 mb-8">
               Click the link in the email to reset your password. If you don't
               see it, check your spam folder.
             </p>
@@ -53,6 +53,7 @@ export default function ForgotPassword() {
             value="Back to Login"
             style="base" 
             size="md" 
+            bg="btn2"
             link="/login"
             classes="rounded-lg w-full"
             />
@@ -63,16 +64,16 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center py-10 px-4">
+    <div className="min-h-screen bg-secondary flex items-center justify-center py-10 px-4">
       <div className="w-full max-w-md">
        <h2 className="text-3xl font-semibold mb-10 text-center">Shopping</h2>
-        <div className="bg-white rounded-2xl shadow-lg py-6 px-4">
+        <div className="bg-bg rounded-2xl shadow-lg py-6 px-4">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h1 className="text-2xl font-semibold text-text2 mb-2">
               Forgot Password?
             </h1>
 
-            <p className="text-gray-600">
+            <p className="text-text1">
               No worries! Enter your email and we'll send you reset
               instructions.
             </p>
@@ -93,30 +94,30 @@ export default function ForgotPassword() {
               />
 
               {error && (
-                <p className="mt-2 text-sm text-red-600 animate-shake">
+                <p className="mt-2 text-sm text-secondary2 animate-shake">
                   {error}
                 </p>
               )}
             </div>
-            <Button value="Send Reset Link" style="base" size="md" onClick={handleSubmit} classes="rounded-lg w-full"/>
+            <Button value="Send Reset Link" style="base" bg="btn2" size="md" onClick={handleSubmit} classes="rounded-lg w-full"/>
           </div>
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-text1">
               Remember your password?{" "}
-              <Link to="/login" className="text-blue-500">Sign in</Link>
+              <Link to="/login" className="text-secondary2">Sign in</Link>
             </p>
           </div>
         </div>
 
         {/* Additional Help */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text1">
             Need help? Contact our{" "}
             <Link
               to="/support"
-              className="text-blue-500 font-medium"
+              className="text-secondary2 font-medium"
             >
               support team
             </Link>

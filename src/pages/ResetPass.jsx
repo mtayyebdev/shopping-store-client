@@ -73,18 +73,18 @@ export default function ResetPassword() {
   // Success Screen
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-lg px-4 py-6 text-center">
-            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full animate-bounce">
-              <LuCheck className="w-10 h-10 text-green-600" />
+          <div className="bg-bg rounded-2xl shadow-lg px-4 py-6 text-center">
+            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-btn1/25 rounded-full animate-bounce">
+              <LuCheck className="w-10 h-10 text-btn1" />
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl font-bold text-text2 mb-3">
               Password Reset Successful!
             </h2>
 
-            <p className="text-gray-600 mb-8">
+            <p className="text-text1 mb-8">
               Your password has been successfully reset. You can now login with your new password.
             </p>
 
@@ -93,6 +93,7 @@ export default function ResetPassword() {
               style="base"
               size="md"
               link="/login"
+              bg="btn2"
               classes="rounded-lg w-full"
             />
           </div>
@@ -102,18 +103,18 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen py-10 bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen py-10 bg-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <h2 className="text-3xl font-semibold mb-10 text-center">
           Shopping
         </h2>
-        <div className="bg-white rounded-2xl shadow-lg px-4 py-6">
+        <div className="bg-bg rounded-2xl shadow-lg px-4 py-6">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h1 className="text-2xl font-semibold text-text2 mb-2">
               Reset Password
             </h1>
 
-            <p className="text-gray-600">
+            <p className="text-text1">
               Enter your new password below to reset your account password.
             </p>
           </div>
@@ -149,7 +150,7 @@ export default function ResetPassword() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 animate-shake">
+              <p className="text-sm text-secondary2 animate-shake">
                 {error}
               </p>
             )}
@@ -158,6 +159,7 @@ export default function ResetPassword() {
               value={"Reset Password"}
               style="base"
               size="md"
+              bg="btn2"
               onClick={handleSubmit}
               classes="rounded-lg w-full mt-4"
             />
@@ -165,9 +167,9 @@ export default function ResetPassword() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-text1">
               Remember your password?{" "}
-              <Link to="/login" className="text-blue-500">
+              <Link to="/login" className="text-secondary2">
                 Sign in
               </Link>
             </p>
@@ -176,9 +178,9 @@ export default function ResetPassword() {
 
         {/* Additional Help */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text1">
             Need help? Contact our{" "}
-            <Link to="/support" className="text-blue-500 font-medium">
+            <Link to="/support" className="text-secondary2 font-medium">
               support team
             </Link>
           </p>

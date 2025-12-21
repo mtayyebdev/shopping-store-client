@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { LuSearch, LuShoppingCart, LuUser, LuMenu, LuX } from "react-icons/lu";
+import { LuSearch, LuShoppingCart, LuUser, LuMenu, LuX,LuHeart } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { Button } from "../index.js";
 
 export default function Header() {
-  const [isLogined, setisLogined] = useState(false);
+  const [isLogined, setisLogined] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(3);
@@ -19,6 +19,10 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
+      <div className="text-center text-sm md:text-base bg-btn py-2 text-text flex items-center justify-center flex-wrap px-3 flex-row gap-2 sm:gap-3">
+          <h2>Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!</h2>
+          <Link to={"/shop"} className="font-semibold underline hover:text-blue-400">Shop Now</Link>
+        </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center gap-3">
@@ -73,8 +77,7 @@ export default function Header() {
                   <LuUser className="w-6 h-6 transform group-hover:scale-110 transition-transform duration-300" />
                 }
                 iconPosition="left"
-                link="/profile"
-                value="Profile"
+                link="/account"
                 paddings={false}
                 classes="group hover:text-blue-600"
               />
@@ -91,6 +94,14 @@ export default function Header() {
                 classes="group hover:text-blue-600"
               />
             )}
+
+            {/* Wishlist icon */}
+            <Link
+              to="/account/wishlist"
+              className="relative text-gray-700 hover:text-blue-600 transition-colors duration-300 group"
+            >
+              <LuHeart className="w-6 h-6 transform group-hover:scale-110 transition-transform duration-300" />
+            </Link>
 
             {/* Cart Icon */}
             <Link

@@ -22,7 +22,7 @@ function Input({
   return (
     <div className={`flex flex-col ${parentClass}`}>
       {label && (
-        <label className="text-sm text-gray-950" htmlFor={name}>
+        <label className="text-sm mb-1 font-semibold text-text2" htmlFor={name}>
           {labelText}
         </label>
       )}

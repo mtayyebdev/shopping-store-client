@@ -29,9 +29,9 @@ function SignIn() {
 
   return (
     <>
-      <div className="container-full bg-[#FCFAFF] dark:bg-gray-800 flex items-center justify-center flex-col w-full h-screen p-4">
+      <div className="container-full bg-secondary flex items-center justify-center flex-col w-full h-screen p-4">
         <h2 className="text-3xl font-semibold mb-10">Shopping</h2>
-        <div className="max-w-md w-full bg-white dark:bg-gray-700 rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
+        <div className="max-w-md w-full bg-bg rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
           <h2 className="text-xl sm:text-2xl font-semibold">Login Your Account</h2>
           <Input
             value={data.email}
@@ -56,12 +56,12 @@ function SignIn() {
             parentClass={"mt-3"}
           />
           {error && (
-            <p className="mb-2 mt-2 text-sm text-red-600 animate-shake">{error}</p>
+            <p className="mb-2 mt-2 text-sm text-secondary2 animate-shake">{error}</p>
           )}
           <p className="mt-1">
             <Link
               to="/forgot-password"
-              className="text-blue-500 underline text-sm"
+              className="text-secondary2 text-sm"
             >
               Forgot Password?
             </Link>
@@ -71,6 +71,7 @@ function SignIn() {
               size="md"
               value="SignIn"
               style="base"
+              bg="btn2"
               rounded
               classes="font-semibold w-[150px]"
               onClick={loginHandler}
@@ -79,7 +80,7 @@ function SignIn() {
         </div>
         <p className="mt-6">
           Don't have an account?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
+          <Link to="/register" className="text-secondary2 hover:underline">
             SignUp
           </Link>
         </p>
