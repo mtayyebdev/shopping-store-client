@@ -2,46 +2,34 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LuMapPin, LuPackage } from "react-icons/lu";
 import { Button, Input } from '../components/index.js'
+import { useSelector,useDispatch } from "react-redux";
+import { getOrders } from "../store/publicSlices/OrderSlice.jsx";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function Checkout() {
+  const dispatch=useDispatch()
   const navigate = useNavigate();
+  const { user, isLoggedIn } = useSelector((state) => state.userSlice);
+  const { orderData } = useSelector((state) => state.orderSlice);
 
-  // Default address from DB - Replace with actual API call
-  const [defaultAddress] = useState({
-    fullName: "John Doe",
-    phone: "+91 9876543210",
-    address: "123 Main Street, Apartment 4B",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pincode: "400001"
-  });
+  // Default address from DB
+  const [defaultAddress, setdefaultAddress] = useState(null);
 
-  // Sample selected cart items - Replace with actual cart state
-  const [selectedItems] = useState([
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-      price: 2999,
-      quantity: 1
-    },
-    {
-      id: 2,
-      name: "Smart Watch Pro Series",
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-      price: 5499,
-      quantity: 2
-    }
-  ]);
+  // Selected items from cart
+  const selectedItems = orderData?.selectedItems || [];
 
   const [useDefaultAddress, setUseDefaultAddress] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
-    fullName: "",
+    name: "",
     phone: "",
     address: "",
     city: "",
-    state: "",
-    pincode: ""
+    region: "",
+    district: "",
+    landmark: "",
+    shipTo: "",
+    email: ""
   });
 
   // Load default address when checkbox is checked
@@ -50,20 +38,27 @@ export default function Checkout() {
       setShippingAddress(defaultAddress);
     } else if (!useDefaultAddress) {
       setShippingAddress({
-        fullName: "",
+        name: "",
         phone: "",
         address: "",
         city: "",
-        state: "",
-        pincode: ""
+        region: "",
+        district: "",
+        landmark: "",
+        shipTo: "",
+        email: ""
       });
     }
   }, [useDefaultAddress, defaultAddress]);
 
-  // Calculate totals
-  const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryCharge = subtotal > 500 ? 0 : 40;
-  const total = subtotal + deliveryCharge;
+  useEffect(() => {
+    if (isLoggedIn) {
+      if (user && user.addresses) {
+        const defaultAddress = user?.addresses?.find((addr) => addr.defaultShipping === true);
+        setdefaultAddress(defaultAddress || null);
+      }
+    }
+  }, [user, isLoggedIn]);
 
   // Handle input change
   const handleInputChange = (e) => {
@@ -73,25 +68,65 @@ export default function Checkout() {
     });
   };
 
-  // Proceed to payment
-  const handleProceedToPayment = (e) => {
+  const handleProceedToPayment = async (e) => {
     e.preventDefault();
 
     // Validate form
-    if (!shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.address ||
-      !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
-      alert("Please fill in all shipping address fields");
+    if (!shippingAddress.name || !shippingAddress.phone || !shippingAddress.address ||
+      !shippingAddress.city || !shippingAddress.region || !shippingAddress.district) {
+      toast.error("Please fill in all shipping address fields");
       return;
     }
-
-    // Navigate to payment page with order details
-    navigate('/payment/34737247384', {
-      state: {
-        shippingAddress: shippingAddress,
-        items: selectedItems,
-        total: total
+    if (orderData?.directOrder) {
+      if (!shippingAddress.email) {
+        toast.error("Email is required");
+        return;
       }
-    });
+    }
+
+    if (orderData?.directOrder) {
+      const bodyData = {
+        productId: orderData?.productId,
+        quantity: orderData?.quantity,
+        size: orderData?.size,
+        color: orderData?.color,
+        totalPrice: orderData?.total,
+        taxPrice: 0,
+        shippingAddress,
+      }
+
+      try {
+        const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/order/buy-now`, bodyData);
+        if (res.status === 200) {
+          navigate(`/payment/${res.data.data}`);
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || error.message)
+      }
+      
+    } else {
+      const cartsIds = selectedItems.map((item) => item._id);
+      const orderPayload = {
+        cartsIds,
+        shippingAddress,
+        itemsPrice: orderData?.subtotal,
+        shippingPrice: orderData?.deliveryCharge,
+        taxPrice: 0,
+        totalPrice: orderData?.total
+      }
+
+      try {
+        const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/order/create`, orderPayload, {
+          withCredentials: true,
+        });
+        if (res.status === 200) {
+          navigate(`/payment/${res.data.data}`);
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || error.message);
+      }
+    }
+    dispatch(getOrders())
   };
 
   return (
@@ -117,7 +152,7 @@ export default function Checkout() {
             </div>
 
             {/* Use Default Address Checkbox */}
-            {defaultAddress && (
+            {isLoggedIn ? defaultAddress && (
               <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
@@ -131,15 +166,17 @@ export default function Checkout() {
                       Use my default address
                     </span>
                     <div className="text-sm text-text1">
-                      <p className="font-medium">{defaultAddress.fullName} | {defaultAddress.phone}</p>
+                      <p className="font-medium">{defaultAddress?.name} | {defaultAddress?.phone}</p>
                       <p className="mt-1">
-                        {defaultAddress.address}, {defaultAddress.city}, {defaultAddress.state} - {defaultAddress.pincode}
+                        {defaultAddress?.address}, {defaultAddress?.city}, {defaultAddress?.region} - {defaultAddress?.district}
                       </p>
+                      <p className="mt-1">{defaultAddress?.landmark}</p>
+                      <div className="mt-1">Ship To: {defaultAddress?.shipTo?.toUpperCase()}</div>
                     </div>
                   </div>
                 </label>
               </div>
-            )}
+            ) : ""}
 
             {/* Shipping Address Form */}
             <div className="space-y-4">
@@ -149,11 +186,11 @@ export default function Checkout() {
                   labelText="Full Name *"
                   label={true}
                   placeholder="Enter full name"
-                  name="fullName"
+                  name="name"
                   size="xl"
                   classes={"disabled:bg-gray-100 disabled:cursor-not-allowed w-full"}
                   required
-                  value={shippingAddress.fullName}
+                  value={shippingAddress.name}
                   onChange={handleInputChange}
                   disabled={useDefaultAddress}
                 />
@@ -188,7 +225,7 @@ export default function Checkout() {
                 ></textarea>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   type="text"
                   labelText="City *"
@@ -204,30 +241,76 @@ export default function Checkout() {
                 />
                 <Input
                   type="text"
-                  labelText="State *"
+                  labelText="Region *"
                   label={true}
-                  placeholder="State"
-                  name="state"
+                  placeholder="State/Province"
+                  name="region"
                   size="xl"
                   classes={"disabled:bg-gray-100 disabled:cursor-not-allowed w-full"}
                   required
-                  value={shippingAddress.state}
+                  value={shippingAddress.region}
+                  onChange={handleInputChange}
+                  disabled={useDefaultAddress}
+                />
+
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  type="text"
+                  labelText="District *"
+                  label={true}
+                  placeholder="District"
+                  name="district"
+                  size="xl"
+                  classes={"disabled:bg-gray-100 disabled:cursor-not-allowed w-full"}
+                  required
+                  value={shippingAddress.district}
                   onChange={handleInputChange}
                   disabled={useDefaultAddress}
                 />
                 <Input
                   type="text"
-                  labelText="Pincode *"
+                  labelText="Landmark *"
                   label={true}
-                  placeholder="400001"
-                  name="pincode"
+                  placeholder="Nearby Landmark"
+                  name="landmark"
                   size="xl"
                   classes={"disabled:bg-gray-100 disabled:cursor-not-allowed w-full"}
-                  required
-                  value={shippingAddress.pincode}
+                  value={shippingAddress.landmark}
                   onChange={handleInputChange}
                   disabled={useDefaultAddress}
                 />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="shipTo" className="font-semibold text-sm">Ship To</label>
+                  <select
+                    id="shipTo"
+                    name="shipTo"
+                    value={shippingAddress.shipTo || ""}
+                    onChange={handleInputChange}
+                    disabled={useDefaultAddress}
+                    className="w-full px-4 py-2.5 border-1 border-gray-500 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    required
+                  >
+                    <option value="" disabled>
+                      Select an option
+                    </option>
+                    <option value="home">Home</option>
+                    <option value="office">Office</option>
+                  </select>
+                </div>
+                {orderData.directOrder && <Input
+                  type="email"
+                  labelText="Email *"
+                  label={true}
+                  placeholder="Your Email"
+                  name="email"
+                  size="xl"
+                  classes={"disabled:bg-gray-100 disabled:cursor-not-allowed w-full"}
+                  value={shippingAddress.email}
+                  onChange={handleInputChange}
+                />}
               </div>
             </div>
           </div>
@@ -245,25 +328,48 @@ export default function Checkout() {
 
             {/* Order Items */}
             <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
-              {selectedItems.map((item) => (
-                <div key={item.id} className="flex gap-3">
+              {orderData?.directOrder ? selectedItems.map((item) => (
+                <div key={item._id} className="flex gap-3">
                   <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item?.image}
+                      alt={item?.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-text2 line-clamp-2 mb-1">
-                      {item.name}
+                      {item?.name}
                     </h3>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-text1">
-                        Qty: {item.quantity}
+                        Qty: {item?.quantity}
                       </span>
                       <span className="text-sm font-bold text-text2">
-                        Rs.{(item.price * item.quantity).toLocaleString()}
+                        Rs.{(item?.price * item?.quantity).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )) : selectedItems.map((item) => (
+                <div key={item._id} className="flex gap-3">
+                  <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                    <img
+                      src={item?.item?.image}
+                      alt={item?.item?.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-text2 line-clamp-2 mb-1">
+                      {item?.item?.name}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-text1">
+                        Qty: {item?.item?.quantity}
+                      </span>
+                      <span className="text-sm font-bold text-text2">
+                        Rs.{(item?.item?.price * item?.item?.quantity).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -274,13 +380,13 @@ export default function Checkout() {
             {/* Price Details */}
             <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
               <div className="flex justify-between text-sm">
-                <span className="text-text1">Subtotal ({selectedItems.length} items)</span>
-                <span className="font-semibold text-text2">Rs.{subtotal.toLocaleString()}</span>
+                <span className="text-text1">Subtotal ({selectedItems?.length} items)</span>
+                <span className="font-semibold text-text2">Rs.{orderData?.subtotal?.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text1">Delivery Charges</span>
-                <span className={`font-semibold ${deliveryCharge === 0 ? 'text-green-600' : 'text-text2'}`}>
-                  {deliveryCharge === 0 ? 'FREE' : `Rs.${deliveryCharge}`}
+                <span className={`font-semibold ${orderData?.deliveryCharge === 0 ? 'text-green-600' : 'text-text2'}`}>
+                  {orderData?.deliveryCharge === 0 ? 'FREE' : `Rs.${orderData?.deliveryCharge}`}
                 </span>
               </div>
             </div>
@@ -288,11 +394,11 @@ export default function Checkout() {
             {/* Total */}
             <div className="flex justify-between mb-6">
               <span className="text-lg font-bold text-text2">Total Amount</span>
-              <span className="text-xl font-bold text-text2">Rs.{total.toLocaleString()}</span>
+              <span className="text-xl font-bold text-text2">Rs.{orderData?.total?.toLocaleString()}</span>
             </div>
 
             {/* Proceed to Payment Button */}
-            <Button value="Proceed to Payment" bg="btn2" size="md" style="base" onClick={handleProceedToPayment} classes="w-full"/>
+            <Button value="Proceed to Payment" bg="btn2" size="md" style="base" onClick={handleProceedToPayment} classes="w-full" />
 
             {/* Back to Cart Link */}
             <Link

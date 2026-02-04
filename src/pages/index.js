@@ -13,6 +13,8 @@ import Order from "./account pages/Orders";
 import Profile from "./account pages/Profile";
 import Returns from "./account pages/Returns";
 import Wishlist from "./account pages/Wishlist";
+import Shop from "./Shop";
+import OrderDetails from "./account pages/OrderDetails";
 
 export {
   Home,
@@ -30,4 +32,6 @@ export {
   Profile,
   Returns,
   Wishlist,
+  Shop,
+  OrderDetails
 };

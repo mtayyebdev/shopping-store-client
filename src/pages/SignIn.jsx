@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Button, Input } from "../components/index.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from 'react-toastify'
 
 function SignIn() {
+  const navigate = useNavigate()
+
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -17,14 +21,35 @@ function SignIn() {
     }));
   };
 
-  const loginHandler = (e) => {
+  const loginHandler = async (e) => {
     setError("");
 
     if (!data.email || !data.password) {
       setError("Please fill in all fields");
       return;
     }
-    console.log("Login data:", data);
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/signin`, {
+        email: data.email,
+        password: data.password,
+      },
+        {
+          withCredentials: true
+        }
+      )
+
+      if (res.status == 200) {
+        toast.success("Login successfully.")
+        navigate("/")
+      }
+    } catch (error) {
+      if(error.status===500){
+        toast.error("Server error. Please try again later.")
+      }else{
+        setError(error?.response?.data?.message);
+      }
+    }
   };
 
   return (

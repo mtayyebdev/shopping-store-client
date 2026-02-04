@@ -1,12 +1,17 @@
 import React, { useState, useRef } from "react";
 import { Input, Button } from "../components/index.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { LuX } from "react-icons/lu";
 
 function SignUp() {
+  const navigate = useNavigate()
   const [data, setData] = useState({
     username: "",
     email: "",
     password: "",
+    confirmPassword: ""
   });
   const [error, setError] = useState("");
   const [isVerified, setisVerified] = useState(false);
@@ -41,35 +46,100 @@ function SignUp() {
     }
   };
 
-  const registerHanlder = () => {
+  const signupHandler = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/signup`, {
+        name: data.username,
+        email: data.email,
+        password: data.password
+      })
+      if (res.status == 200) {
+        toast.success("Signup successfully.");
+        setisVerified(false);
+        navigate("/login")
+      }
+    } catch (error) {
+      if (error?.status === 500) {
+        toast.error("Something went wrong.");
+      }
+      else {
+        toast.error(error?.response?.data?.message);
+      }
+    }
+  }
+
+  const sendOTPHandler = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/send-otp`, {
+        email: data.email
+      })
+      if (res.status == 200) {
+        toast.success("We sended an 6 digit OTP to your entered email. Please check your email address and verify your account.");
+        setpopup(true);
+      }
+    } catch (error) {
+      if (error?.status === 500) {
+        toast.error("Something went wrong.");
+      }
+      else {
+        toast.error(error?.response?.data?.message);
+      }
+    }
+  }
+
+  const registerHanlder = async () => {
     setError("");
 
-    if (!data.username || !data.email || !data.password) {
+    if (!data.username || !data.email || !data.password || !data.confirmPassword) {
       setError("Please fill in all fields");
       return;
     }
 
+    if (data.password !== data.confirmPassword) {
+      setError("Password not matching");
+      return;
+    }
+
     if (!isVerified) {
-      setpopup(true);
+      sendOTPHandler();
     } else {
-      alert("Registered Successfully!");
-      setisVerified(false);
+      signupHandler();
     }
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
       setError("Please enter all 6 digits");
       return;
     }
-    setisVerified(true);
-    setpopup(false);
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/verify-otp`, {
+        email: data.email,
+        otpCode
+      })
+
+      if (res.status == 200) {
+        toast.success("Account verified successfully.");
+        setisVerified(true);
+        setpopup(false);
+        signupHandler();
+      }
+    } catch (error) {
+      if (error?.status === 500) {
+        toast.error("Something went wrong.");
+      }
+      else {
+        toast.error(error?.response?.data?.message);
+      }
+    }
+
   };
 
   return (
     <>
-      <div className="container-full py-10 bg-secondary flex items-center justify-center flex-col w-full min-h-screen p-4">
+      <div className="container-full py-10 bg-secondary flex items-center justify-center flex-col w-full min-h-screen p-4 md:p-0">
         <h2 className="text-3xl font-semibold mb-6">Shopping</h2>
         <div className="max-w-md w-full bg-bg rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
           <h2 className="text-xl sm:text-2xl font-semibold">Create an account</h2>
@@ -93,6 +163,7 @@ function SignUp() {
             label={true}
             size="xl"
             type="email"
+            disabled={isVerified}
             parentClass={"mt-3"}
           />
           <Input
@@ -101,6 +172,17 @@ function SignUp() {
             placeholder="Enter your password"
             name="password"
             labelText="Password"
+            label={true}
+            size="xl"
+            type="password"
+            parentClass={"mt-3"}
+          />
+          <Input
+            value={data.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm new password"
+            name="confirmPassword"
+            labelText="Confirm Password"
             label={true}
             size="xl"
             type="password"
@@ -132,7 +214,8 @@ function SignUp() {
       </div>
       {popup && (
         <div className="popup w-full h-full fixed top-0 left-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-bg w-[350px] p-6 rounded-lg shadow-lg">
+          <div className="bg-bg w-[350px] p-6 rounded-lg relative shadow-lg">
+            <LuX size={24} className="absolute top-4 right-4 cursor-pointer" onClick={()=>setpopup(false)}/>
             <h2 className="text-xl font-semibold mb-1">Email Verification</h2>
             <p>We send 6 digits OTP to your email for confirmation.</p>
             <div className="mt-7">

@@ -1,10 +1,16 @@
-import { useState } from "react";
-import { LuSearch, LuShoppingCart, LuUser, LuMenu, LuX,LuHeart } from "react-icons/lu";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { LuSearch, LuShoppingCart, LuUser, LuMenu, LuX, LuHeart } from "react-icons/lu";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../index.js";
+import { useDispatch, useSelector } from 'react-redux'
+import { getUser } from '../../store/publicSlices/UserSlice.jsx'
+import { getCarts } from '../../store/publicSlices/CartSlice.jsx'
+import { getOrders } from "../../store/publicSlices/OrderSlice.jsx";
 
 export default function Header() {
-  const [isLogined, setisLogined] = useState(true);
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+  const { user, isLoggedIn } = useSelector((state) => state.userSlice);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(3);
@@ -12,17 +18,36 @@ export default function Header() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Handle search logic here
-      console.log("Searching for:", searchQuery);
+      navigate(`/shop?s=${searchQuery}`)
     }
   };
+
+  useEffect(() => {
+    dispatch(getUser());
+
+    if (isLoggedIn) {
+      dispatch(getCarts());
+      dispatch(getOrders());
+    }
+  }, [dispatch, isLoggedIn]);
+
+  const { carts } = useSelector((state) => state.cartSlice);
+
+  useEffect(() => {
+    if (carts && carts.length > 0) {
+      const totalItems = carts.reduce((total, cart) => total + cart.item.quantity, 0);
+      setCartCount(totalItems);
+    } else {
+      setCartCount(0);
+    }
+  }, [carts]);
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="text-center text-sm md:text-base bg-btn py-2 text-text flex items-center justify-center flex-wrap px-3 flex-row gap-2 sm:gap-3">
-          <h2>Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!</h2>
-          <Link to={"/shop"} className="font-semibold underline hover:text-blue-400">Shop Now</Link>
-        </div>
+        <h2>Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!</h2>
+        <Link to={"/shop"} className="font-semibold underline hover:text-blue-400">Shop Now</Link>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center gap-3">
@@ -70,17 +95,10 @@ export default function Header() {
           {/* Right - Icons (Desktop) */}
           <div className="flex items-center space-x-5 sm:space-x-6">
             {/* Profile Icon */}
-            {isLogined ? (
-              <Button
-                size="lg"
-                icon={
-                  <LuUser className="w-6 h-6 transform group-hover:scale-110 transition-transform duration-300" />
-                }
-                iconPosition="left"
-                link="/account"
-                paddings={false}
-                classes="group hover:text-blue-600"
-              />
+            {isLoggedIn ? (
+              <Link to={'/account'} className="w-8 h-8 rounded-full overflow-hidden">
+                <img src={user?.avatar?.url} alt="" className="object-center" />
+              </Link>
             ) : (
               <Button
                 size="lg"
@@ -142,7 +160,7 @@ export default function Header() {
       {/* Mobile Menu Sidebar */}
       {isMobileMenuOpen && (
         <>
-          <div className="md:hidden fixed top-0 left-0 min-h-screen w-full bg-black/50" onClick={()=>setIsMobileMenuOpen(false)}></div>
+          <div className="md:hidden fixed top-0 left-0 min-h-screen w-full bg-black/50" onClick={() => setIsMobileMenuOpen(false)}></div>
           <div className="md:hidden fixed left-0 min-h-screen top-0 w-[250px] bg-white border-r shadow-lg border-gray-200 animate-sideBar">
             <ul className="px-4 py-4 space-y-3">
               <li>Home</li>

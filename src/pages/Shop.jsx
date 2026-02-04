@@ -1,0 +1,339 @@
+import { useState, useEffect } from "react";
+import { LuSlidersHorizontal, LuX, LuChevronDown, LuStar, LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { ProductCard, Button } from '../components/index.js'
+import { useSearchParams } from 'react-router-dom'
+import { searchProducts } from '../store/publicSlices/ProductsSlice.jsx'
+import { useDispatch } from 'react-redux'
+
+export default function Shop() {
+    const dispatch = useDispatch();
+    const search = useSearchParams()
+    const searchedValue = search[0].get("s");
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState("bestMatch");
+    const [currentProducts, setcurrentProducts] = useState([]);
+    const productsPerPage = 10;
+
+    // Filter states
+    const [priceRange, setPriceRange] = useState([0, 500000]);
+    const [selectedColors, setSelectedColors] = useState([]);
+    const [selectedSizes, setSelectedSizes] = useState([]);
+    const [selectedBrands, setSelectedBrands] = useState([]);
+    const [selectedRating, setSelectedRating] = useState(0);
+    const [totalpages, settotalpages] = useState(0)
+    const [hasWarranty, setHasWarranty] = useState(false);
+
+    // Filter options
+    const colors = ["Black", "White", "Blue", "Red", "Green", "Yellow", "Purple", "Pink"];
+    const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
+    const brands = ["Nike", "Adidas", "Puma", "Reebok", "Sony", "Samsung", "Apple"];
+
+    const handleColorToggle = (color) => {
+        setSelectedColors(prev =>
+            prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
+        );
+    };
+
+    const handleSizeToggle = (size) => {
+        setSelectedSizes(prev =>
+            prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+        );
+    };
+
+    const handleBrandToggle = (brand) => {
+        setSelectedBrands(prev =>
+            prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+        );
+    };
+
+    const clearAllFilters = () => {
+        setPriceRange([0, 10000]);
+        setSelectedColors([]);
+        setSelectedSizes([]);
+        setSelectedBrands([]);
+        setSelectedRating(0);
+        setHasWarranty(false);
+    };
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const filters = {
+                minPrice: priceRange[0],
+                maxPrice: priceRange[1],
+                ratings: selectedRating,
+                color: selectedColors,
+                size: selectedSizes,
+                brand: selectedBrands,
+                sortBy,
+                page: currentPage,
+                limit: productsPerPage
+            }
+            await dispatch(searchProducts({ search: searchedValue, filters }))
+                .then((res) => {
+                    if (res.type === "search/fulfilled") {
+                        setcurrentProducts(res.payload.data);
+                        settotalpages(res.payload.totalPages);
+                    }
+                })
+        };
+        fetchProducts();
+    }, [searchedValue, sortBy, priceRange, selectedBrands, selectedColors, selectedSizes, selectedRating, currentPage, productsPerPage])
+
+    return (
+        <div className="min-h-screen py-6">
+            {/* Overlay for Mobile */}
+            {isSidebarOpen && (
+                <div
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="lg:hidden fixed inset-0 bg-black/50 z-20"
+                ></div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                {/* Left Sidebar - Filters */}
+                <div
+                    className={`lg:col-span-1 fixed lg:relative inset-y-0 left-0 top-52 shop-sideBar md:top-30 lg:top-0 z-25 w-80 lg:w-auto transform transition-transform duration-300 lg:transform-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                        }`}
+                >
+                    <div className="bg-primary rounded p-4 h-screen lg:h-auto overflow-y-auto">
+                        {/* Sidebar Header */}
+                        <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+                            <h2 className="text-xl font-bold text-text2">Filters</h2>
+                            <button
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="lg:hidden text-text1 hover:text-text2"
+                            >
+                                <LuX className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Clear All */}
+                        <button
+                            onClick={clearAllFilters}
+                            className="w-full text-blue-600 hover:text-blue-700 font-semibold text-sm mb-4"
+                        >
+                            Clear All Filters
+                        </button>
+
+                        {/* Price Range */}
+                        <div className="mb-6">
+                            <h3 className="font-bold text-text2 mb-3">Price Range</h3>
+                            <div className="space-y-3">
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="10000"
+                                    value={priceRange[1]}
+                                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                                    className="w-full"
+                                />
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-text1">Rs.{priceRange[0]}</span>
+                                    <span className="text-text2 font-semibold">Rs.{priceRange[1]}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Colors */}
+                        <div className="mb-6">
+                            <h3 className="font-bold text-text2 mb-3">Color</h3>
+                            <div className="grid grid-cols-4 gap-2">
+                                {colors.map((color) => (
+                                    <button
+                                        key={color}
+                                        onClick={() => handleColorToggle(color)}
+                                        className={`border-2 rounded-lg p-2 text-xs font-medium transition-all duration-300 ${selectedColors.includes(color)
+                                            ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        {color}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Sizes */}
+                        <div className="mb-6">
+                            <h3 className="font-bold text-text2 mb-3">Size</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                {sizes.map((size) => (
+                                    <button
+                                        key={size}
+                                        onClick={() => handleSizeToggle(size)}
+                                        className={`border-2 rounded-lg py-2 text-sm font-medium transition-all duration-300 ${selectedSizes.includes(size)
+                                            ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Brands */}
+                        <div className="mb-6">
+                            <h3 className="font-bold text-text2 mb-3">Brand</h3>
+                            <div className="space-y-2">
+                                {brands.map((brand) => (
+                                    <label key={brand} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedBrands.includes(brand)}
+                                            onChange={() => handleBrandToggle(brand)}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-700">{brand}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Rating */}
+                        <div className="mb-6">
+                            <h3 className="font-bold text-text2 mb-3">Rating</h3>
+                            <div className="space-y-2">
+                                {[4, 3, 2, 1].map((rating) => (
+                                    <button
+                                        key={rating}
+                                        onClick={() => setSelectedRating(rating)}
+                                        className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg transition-colors duration-300 ${selectedRating === rating
+                                            ? 'bg-blue-50 text-blue-600'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(rating)].map((_, i) => (
+                                                <LuStar key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                            ))}
+                                        </div>
+                                        <span className="text-sm font-medium">& Up</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Warranty */}
+                        {/* <div className="mb-6">
+                            <h3 className="font-bold text-text2 mb-3">Warranty</h3>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={hasWarranty}
+                                    onChange={(e) => setHasWarranty(e.target.checked)}
+                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700">Has Warranty</span>
+                            </label>
+                        </div> */}
+                    </div>
+                </div>
+
+                {/* Right - Products */}
+                <div className="lg:col-span-3">
+                    {/* Top Bar - Results & Sort */}
+                    <div className="bg-primary rounded p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex gap-3 items-center">
+                            {/* Mobile Filter Button */}
+                            <Button
+                                onClick={() => setIsSidebarOpen(true)}
+                                classes="lg:hidden py-2 px-2"
+                                icon={<LuSlidersHorizontal className="w-5 h-5" />}
+                                iconPosition="left"
+                                bg="btn2"
+                                size="md"
+                                value="Filters"
+                                style="base"
+                                paddings={false}
+                            />
+                            <div>
+                                <p className="text-text2 font-semibold text-lg">
+                                    {searchedValue}
+                                </p>
+                                <p className="text-sm text-text1">
+                                    {currentProducts?.length} items found for "{searchedValue}"
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Sort By Dropdown */}
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm font-semibold text-gray-700">Sort By:</span>
+                            <div className="relative">
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="appearance-none bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer"
+                                >
+                                    <option value="bestMatch">Best Match</option>
+                                    <option value="LToH">Price: Low to High</option>
+                                    <option value="HToL">Price: High to Low</option>
+                                </select>
+                                <LuChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text1 pointer-events-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Products Grid */}
+                    <div className="grid p-2 grid-cols-2 sm:grid-cols-3 bg-primary lg:grid-cols-4 gap-4 pb-3">
+                        {currentProducts.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalpages > 1 && (
+                        <div className="bg-primary rounded py-4 px-2">
+                            <div className="flex items-center justify-end gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-1.5 py-1 border border-gray-300 rounded font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+                                >
+                                    <LuChevronLeft size={24} />
+                                </button>
+
+                                {[...Array(Math.min(5, totalpages))].map((_, i) => {
+                                    let pageNum;
+                                    if (totalpages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage >= totalpages - 2) {
+                                        pageNum = totalpages - 4 + i;
+                                    } else {
+                                        pageNum = currentPage - 2 + i;
+                                    }
+
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`px-3 py-1 rounded font-medium transition-colors duration-300 ${currentPage === pageNum
+                                                ? 'bg-blue-600 text-white'
+                                                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(totalpages, prev + 1))}
+                                    disabled={currentPage === totalpages}
+                                    className="px-1.5 py-1 border border-gray-300 rounded font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+                                >
+                                    <LuChevronRight size={24} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

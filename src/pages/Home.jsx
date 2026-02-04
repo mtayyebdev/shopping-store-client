@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HeroSwiper,
   ProductCard,
@@ -11,6 +11,8 @@ import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { useDispatch, useSelector } from 'react-redux'
+import { getProducts, getFeatured, getNewArrivals, getPopular, getTopRated } from '../store/publicSlices/ProductsSlice.jsx'
 
 // Import Swiper styles
 import "swiper/css";
@@ -18,6 +20,26 @@ import "swiper/css/navigation";
 
 function Home() {
   const [swiperRef, setSwiperRef] = useState(null);
+  const dispatch = useDispatch();
+  const {
+    allProducts,
+    featuedProducts,
+    popularProducts,
+    newArrivals,
+    topRatedProducts
+  } = useSelector((state) => state.productsSlice);
+
+  const dispatchProducts = () => {
+    dispatch(getProducts());
+    dispatch(getFeatured());
+    dispatch(getNewArrivals());
+    dispatch(getPopular());
+    dispatch(getTopRated());
+  }
+
+  useEffect(() => {
+    dispatchProducts();
+  }, [dispatch])
 
   const categories = [
     {
@@ -78,216 +100,6 @@ function Home() {
     },
   ];
 
-  const popularProducts = [
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      description: "High-quality sound with noise cancellation",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-      price: 2999,
-      originalPrice: 4999,
-      discount: 40,
-      rating: 4.5,
-      reviews: 128,
-    },
-    {
-      id: 2,
-      name: "Smart Watch Pro Series",
-      description: "Track your fitness and stay connected",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
-      price: 5499,
-      originalPrice: 7999,
-      discount: 31,
-      rating: 4.6,
-      reviews: 189,
-    },
-    {
-      id: 3,
-      name: "Designer Leather Bag",
-      description: "Elegant and spacious leather handbag",
-      image:
-        "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&q=80",
-      price: 3999,
-      originalPrice: 6999,
-      discount: 43,
-      rating: 4.9,
-      reviews: 342,
-    },
-    {
-      id: 4,
-      name: "Running Shoes Elite",
-      description: "Comfortable running shoes for athletes",
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80",
-      price: 4599,
-      originalPrice: 6999,
-      discount: 34,
-      rating: 4.7,
-      reviews: 198,
-    },
-    {
-      id: 5,
-      name: "Digital Camera 4K",
-      description: "Professional photography camera",
-      image:
-        "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80",
-      price: 12999,
-      originalPrice: 18999,
-      discount: 32,
-      rating: 4.9,
-      reviews: 421,
-    },
-  ];
-
-  const topRatedProducts = [
-    {
-      id: 1,
-      name: "Sony WH-1000XM5 Wireless Headphones",
-      description: "Industry-leading noise cancellation headphones",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-      price: 29990,
-      originalPrice: 34990,
-      discount: 14,
-      rating: 4.9,
-      reviews: 2847,
-    },
-    {
-      id: 2,
-      name: "Apple iPhone 15 Pro Max",
-      image:
-        "https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=500&q=80",
-      description: "Latest flagship with A17 Pro chip",
-      price: 134900,
-      originalPrice: 149900,
-      discount: 10,
-      rating: 4.8,
-      reviews: 3521,
-    },
-    {
-      id: 3,
-      name: 'Samsung 55" 4K Smart TV',
-      description: "Crystal UHD with HDR support",
-      image:
-        "https://images.unsplash.com/photo-1593784991095-a205069470b6?w=500&q=80",
-      price: 47999,
-      originalPrice: 64999,
-      discount: 26,
-      rating: 4.7,
-      reviews: 1896,
-    },
-    {
-      id: 4,
-      name: "MacBook Air M3",
-      description: "13-inch with Apple M3 chip",
-      image:
-        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80",
-      price: 114900,
-      originalPrice: 134900,
-      discount: 15,
-      rating: 4.9,
-      reviews: 2134,
-    },
-    {
-      id: 5,
-      name: "Bose SoundLink Revolve+",
-      description: "Portable Bluetooth speaker with 360° sound",
-      image:
-        "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&q=80",
-      price: 24990,
-      originalPrice: 32990,
-      discount: 24,
-      rating: 4.8,
-      reviews: 1567,
-    },
-    {
-      id: 6,
-      name: "Canon EOS R6 Mark II",
-      description: "Professional mirrorless camera",
-      image:
-        "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80",
-      price: 219999,
-      originalPrice: 249999,
-      discount: 12,
-      rating: 4.9,
-      reviews: 892,
-    },
-    {
-      id: 7,
-      name: "Dyson V15 Detect Vacuum",
-      description: "Cordless vacuum with laser detection",
-      image:
-        "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=500&q=80",
-      price: 59990,
-      originalPrice: 69990,
-      discount: 14,
-      rating: 4.8,
-      reviews: 1234,
-    },
-    {
-      id: 8,
-      name: "Nike Air Zoom Pegasus 40",
-      description: "Premium running shoes for athletes",
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80",
-      price: 10995,
-      originalPrice: 12995,
-      discount: 15,
-      rating: 4.7,
-      reviews: 3421,
-    },
-    {
-      id: 9,
-      name: "PlayStation 5 Slim",
-      description: "Next-gen gaming console",
-      image:
-        "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500&q=80",
-      price: 54990,
-      originalPrice: 59990,
-      discount: 8,
-      rating: 4.9,
-      reviews: 4567,
-    },
-    {
-      id: 10,
-      name: "Kindle Paperwhite Signature",
-      description: "Waterproof e-reader with auto-adjusting light",
-      image:
-        "https://images.unsplash.com/photo-1592656094267-764a45160876?w=500&q=80",
-      price: 17999,
-      originalPrice: 19999,
-      discount: 10,
-      rating: 4.8,
-      reviews: 2890,
-    },
-    {
-      id: 11,
-      name: "Logitech MX Master 3S",
-      description: "Ergonomic wireless mouse for professionals",
-      image:
-        "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&q=80",
-      price: 8995,
-      originalPrice: 10995,
-      discount: 18,
-      rating: 4.7,
-      reviews: 1678,
-    },
-    {
-      id: 12,
-      name: "Apple Watch Series 9",
-      description: "Advanced health and fitness tracking",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
-      price: 41900,
-      originalPrice: 45900,
-      discount: 9,
-      rating: 4.8,
-      reviews: 3102,
-    },
-  ];
-
   return (
     <div className="">
       <HeroSwiper />
@@ -303,7 +115,7 @@ function Home() {
             <ProductCard
               save={true}
               product={product}
-              key={product.id}
+              key={product._id}
               classes="shrink-0 w-[110px] h-[200px] sm:w-[150px] sm:h-[240px] md:w-[200px] md:h-[340px] lg:w-[230px] lg:h-[370px]"
             />
           ))}
@@ -436,7 +248,7 @@ function Home() {
               className="toprated-slider"
             >
               {topRatedProducts.map((product) => (
-                <SwiperSlide key={product.id}>
+                <SwiperSlide key={product._id}>
                   <ProductCard product={product} />
                 </SwiperSlide>
               ))}
@@ -533,7 +345,7 @@ function Home() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 h-[500px] sm:h-[290px]">
               <div className="relative bg-btn flex items-center justify-center">
-               <div className="w-[300px] sm:w-[80%] relative p-2">
+                <div className="w-[300px] sm:w-[80%] relative p-2">
                   <img src="/laptop.png" className="w-full" alt="laptop" />
                   <div className="bg-white/15 w-full h-full blur-2xl rounded-full absolute top-0 left-0"></div>
                 </div>
@@ -575,20 +387,20 @@ function Home() {
 
       {/* our products */}
       <section className="our-products bg-white my-5 p-5">
-         <Heading title={"Our Products"} />
-          <h2 className="text-xl sm:text-3xl font-bold mt-4">
-            Explore Our Products
-          </h2>
-          <div className="grid grid-cols-2 mt-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {
-              topRatedProducts.slice(0,20).map((product)=>(
-                <ProductCard product={product} key={product.id}/>
-              ))
-            }
-          </div>
-          <div className="btn flex  items-center justify-center mt-16">
-            <Button value="View All Products" bg="btn2" link="/shop" size="lg" style="base"/>
-          </div>
+        <Heading title={"Our Products"} />
+        <h2 className="text-xl sm:text-3xl font-bold mt-4">
+          Explore Our Products
+        </h2>
+        <div className="grid grid-cols-2 mt-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {
+            allProducts.slice(0, 20).map((product) => (
+              <ProductCard product={product} key={product._id} />
+            ))
+          }
+        </div>
+        <div className="btn flex  items-center justify-center mt-16">
+          <Button value="View All Products" bg="btn2" link="/shop" size="lg" style="base" />
+        </div>
       </section>
     </div>
   );

@@ -2,10 +2,12 @@ import { useState } from "react";
 import { LuCheck } from "react-icons/lu";
 import { Button, Input } from "../components/index.js";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import axios from 'axios'
 
 export default function ResetPassword() {
   const { token } = useParams();
-  
+  const navigate = useNavigate();
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -15,7 +17,6 @@ export default function ResetPassword() {
     e.preventDefault();
     setError("");
 
-    // Validation
     if (!password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -35,39 +36,22 @@ export default function ResetPassword() {
       setError("Invalid or expired reset link");
       return;
     }
-    setIsSubmitted(true);
 
-    // setIsLoading(true);
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/reset-password/${token}`, {
+        password
+      })
 
-    // try {
-    //   // Replace with your actual API endpoint
-    //   const response = await fetch('YOUR_API_ENDPOINT/reset-password', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ 
-    //       token,
-    //       password 
-    //     }),
-    //   });
+      if (res.status == 200) {
+        setIsSubmitted(true);
 
-    //   const data = await response.json();
-
-    //   if (response.ok) {
-    //     setIsSubmitted(true);
-    //     // Redirect to login after 3 seconds
-    //     setTimeout(() => {
-    //       navigate('/login');
-    //     }, 3000);
-    //   } else {
-    //     setError(data.message || 'Something went wrong. Please try again.');
-    //   }
-    // } catch (err) {
-    //   setError('Network error. Please check your connection and try again.');
-    // } finally {
-    //   setIsLoading(false);
-    // }
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection and try again.');
+    }
   };
 
   // Success Screen
@@ -119,9 +103,7 @@ export default function ResetPassword() {
             </p>
           </div>
 
-          {/* Form */}
           <div>
-            {/* New Password Field */}
             <div className="mb-4 relative">
               <Input
                 value={password}
@@ -135,7 +117,6 @@ export default function ResetPassword() {
               />
             </div>
 
-            {/* Confirm Password Field */}
             <div className="mb-2 relative">
               <Input
                 value={confirmPassword}

@@ -28,3 +28,20 @@
   --color-hover-btn1: #00df59;
   --color-hover-btn2: #e42c2c;
 }
+
+@media (width>=456px) and (width<=529px) {
+  .shop-sideBar {
+    @apply top-47;
+  }
+}
+
+@media (width>=530px) and (width<=767px) {
+  .shop-sideBar {
+    @apply top-40;
+  }
+}
+
+.navigation {
+  /* overflow: visible; */
+  overflow-y: auto;
+}

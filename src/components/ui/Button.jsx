@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Button({
   size = "md",
@@ -30,7 +31,7 @@ function Button({
   return (
     <>
       {link ? (
-        <a href={link} className={`cursor-pointer`}>
+        <Link to={link} className={`cursor-pointer`}>
           <button
             className={`cursor-pointer flex ${bgs[bg]} justify-center ${
               styles[style]
@@ -45,7 +46,7 @@ function Button({
               <span className="ml-2">{icon}</span>
             )}
           </button>
-        </a>
+        </Link>
       ) : (
         <button
           className={`cursor-pointer ${bgs[bg]} flex justify-center ${

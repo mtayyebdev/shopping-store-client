@@ -3,20 +3,18 @@ import {
     LuPackage,
     LuRotateCcw,
     LuHeart,
-    LuSettings
+    LuSettings,
+    LuLogOut
 } from "react-icons/lu";
 import { NavLink, Outlet } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from '../store/publicSlices/UserSlice.jsx'
 
 export default function Account() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const dispatch = useDispatch();
+    const { user } = useSelector((state) => state.userSlice);
 
-    const [userData] = useState({
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "+91 9876543210",
-        gender: "Male",
-        dateOfBirth: "1990-01-15"
-    });
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const menuItems = [
         {
@@ -37,6 +35,11 @@ export default function Account() {
         setIsSidebarOpen(false);
     };
 
+    const handleLogout = () => {
+        dispatch(logoutUser());
+        dispatch(getUser());
+    };
+
     return (
         <div className="min-h-screen py-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 relative">
@@ -49,11 +52,11 @@ export default function Account() {
                         {/* User Info */}
                         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
                             <div className="w-12 h-12 bg-secondary2 rounded-full flex items-center justify-center text-text font-bold text-lg">
-                                {userData.name.charAt(0)}
+                                {user?.name.charAt(0)}
                             </div>
                             <div>
-                                <h3 className="font-bold text-text2">{userData.name}</h3>
-                                <p className="text-sm text-text1">{userData.email}</p>
+                                <h3 className="font-bold text-text2">{user?.name}</h3>
+                                <p className="text-sm text-text1">{user?.email}</p>
                             </div>
                         </div>
 
@@ -93,6 +96,14 @@ export default function Account() {
                                     )}
                                 </div>
                             ))}
+                            <NavLink
+                                to="/"
+                                onClick={handleLogout}
+                                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-colors duration-300 text-gray-700 hover:bg-gray-50"
+                            >
+                                <LuLogOut className="w-5 h-5" />
+                                <span>Logout</span>
+                            </NavLink>
                         </nav>
                     </div>
                 </div>

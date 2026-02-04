@@ -15,8 +15,11 @@ import {
   Order,
   Profile,
   Returns,
-  Wishlist
+  Wishlist,
+  Shop,
+  OrderDetails
 } from "../pages/index.js";
+import { Dashboard } from '../pages/dashboard/index.js'
 
 const router = createBrowserRouter([
   {
@@ -42,7 +45,12 @@ const router = createBrowserRouter([
       {
         element: <Product />,
         path: "/product/:slug"
-      }, {
+      },
+      {
+        element: <Shop />,
+        path: "/shop"
+      },
+      {
         element: <Account />,
         path: "/account",
         children: [
@@ -65,6 +73,10 @@ const router = createBrowserRouter([
           {
             element: <Wishlist />,
             path: "wishlist"
+          },
+          {
+            element: <OrderDetails />,
+            path: "order/:orderId"
           }
         ]
       }
@@ -86,6 +98,15 @@ const router = createBrowserRouter([
     element: <ResetPassword />,
     path: "reset-password/:token",
   },
+  {
+    element:<Dashboard/>,
+    path:"web-admin",
+    // children:[
+    //   {
+    //     element:
+    //   }
+    // ]
+  }
 ]);
 
 export default router;

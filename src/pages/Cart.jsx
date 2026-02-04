@@ -9,120 +9,117 @@ import {
   LuShieldCheck,
 } from "react-icons/lu";
 import { Button, Input } from '../components/index.js'
+import { getCarts, deleteCart, deleteCarts, updateCart, toggleCartSelection } from '../store/publicSlices/CartSlice.jsx'
+import { useCoupon } from '../store/publicSlices/CouponSlice.jsx'
+import { setCheckoutData } from '../store/publicSlices/OrderSlice.jsx'
+import { useDispatch, useSelector } from 'react-redux'
+import { useEffect } from "react";
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-      price: 2999,
-      originalPrice: 4999,
-      quantity: 1,
-      inStock: true,
-      selected: true,
-    },
-    {
-      id: 2,
-      name: "Smart Watch Pro Series",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-      price: 5499,
-      originalPrice: 7999,
-      quantity: 2,
-      inStock: true,
-      selected: true,
-    },
-    {
-      id: 3,
-      name: "Designer Leather Bag",
-      image:
-        "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80",
-      price: 3999,
-      originalPrice: 6999,
-      quantity: 1,
-      inStock: true,
-      selected: true,
-    },
-  ]);
+  const disptach = useDispatch();
+  const { carts } = useSelector((state) => state.cartSlice);
 
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [cartsChanged, setcartsChanged] = useState(false);
 
   // Get selected items
-  const selectedItems = cartItems.filter((item) => item.selected);
+  const selectedItems = carts?.filter((item) => item.selected);
   const allSelected =
-    cartItems.length > 0 && cartItems.every((item) => item.selected);
+    carts?.length > 0 && carts.every((item) => item.selected);
 
   // Calculate totals (only for selected items)
   const subtotal = selectedItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item?.totalPrice,
     0
   );
   const totalSavings = selectedItems.reduce(
-    (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
+    (sum, item) => sum + (item?.item.oldPrice - item?.item.price) * item?.item.quantity,
     0
   );
-  const deliveryCharge = subtotal > 500 ? 0 : 40;
-  const couponDiscount = appliedCoupon ? appliedCoupon.discount : 0;
-  const total = subtotal + deliveryCharge - couponDiscount;
+  const deliveryCharge = selectedItems.reduce((sum, item) => sum + (item?.item.shippingFee || 0), 0);
+
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "percentage") {
+      couponDiscount = (subtotal * appliedCoupon.discount) / 100;
+    } else {
+      couponDiscount = appliedCoupon.discount;
+    }
+  }
+  let total = subtotal + deliveryCharge - couponDiscount;
 
   // Toggle item selection
   const toggleItemSelection = (id) => {
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === id ? { ...item, selected: !item.selected } : item
-      )
-    );
+    disptach(toggleCartSelection({ cartId: id, selected: !carts.find(item => item._id === id).selected }));
+    setcartsChanged(!cartsChanged);
   };
 
   // Toggle all items selection
   const toggleAllSelection = () => {
     const newSelectedState = !allSelected;
-    setCartItems(
-      cartItems.map((item) => ({ ...item, selected: newSelectedState }))
-    );
+    carts.forEach((item) => {
+      disptach(toggleCartSelection({ cartId: item._id, selected: newSelectedState }));
+    });
+    setcartsChanged(!cartsChanged);
   };
 
   // Update quantity
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity < 1) return;
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    disptach(updateCart({ cartId: id, quantity: newQuantity }));
+    setcartsChanged(!cartsChanged);
   };
 
   // Remove item
   const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+    disptach(deleteCart(id));
+    setcartsChanged(!cartsChanged);
   };
 
   // Delete all items
   const deleteAllItems = () => {
     const action = confirm("Do you want to delete all your items in cart?");
     if (!action) return;
-    alert("items deleted")
+    const ids = carts.map((item) => item._id);
+    disptach(deleteCarts({ cartsIds: ids }));
+    setcartsChanged(!cartsChanged);
   }
 
   // Apply coupon
   const applyCoupon = () => {
-    if (couponCode === "SAVE10") {
-      setAppliedCoupon({
-        code: "SAVE10",
-        discount: Math.floor(subtotal * 0.1),
-      });
-    } else if (couponCode === "FLAT500") {
-      setAppliedCoupon({ code: "FLAT500", discount: 500 });
-    } else {
-      alert("Invalid coupon code");
-    }
+    if (!couponCode) return;
+    disptach(useCoupon({ code: couponCode, totalAmount: Number(subtotal) }))
+      .then((res) => {
+        if (res.type === "usecoupon/fulfilled") {
+          setAppliedCoupon({
+            code: couponCode,
+            discount: res.payload.data.discountValue,
+            discountType: res.payload.data.discountType
+          });
+        }
+      })
   };
 
+  useEffect(() => {
+    disptach(getCarts());
+  }, [cartsChanged])
+
+  const saveDataForCheckout = () => {
+    const checkoutData = {
+      selectedItems: selectedItems,
+      subtotal: subtotal,
+      deliveryCharge: deliveryCharge,
+      coupon: appliedCoupon,
+      couponDiscount: couponDiscount,
+      total: total
+    };
+
+    disptach(setCheckoutData(checkoutData));
+  }
+
   // Empty cart view
-  if (cartItems.length === 0) {
+  if (carts?.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,7 +147,7 @@ export default function Cart() {
     <div className="min-h-screen py-6">
       {/* Header */}
       <div className="mb-6">
-        {cartItems.length > 0 && (
+        {carts?.length > 0 && (
           <div className="bg-primary rounded p-4 flex items-center justify-between flex-wrap gap-2">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -160,7 +157,7 @@ export default function Cart() {
                 className="w-5 h-5 text-btn2 border-gray-300 rounded focus:ring-2 focus:ring-btn2 cursor-pointer"
               />
               <span className="font-semibold text-text2">
-                Select All Items ( {selectedItems.length}/{cartItems.length} )
+                Select All Items ( {selectedItems.length}/{carts?.length} )
               </span>
             </label>
             <button
@@ -180,9 +177,9 @@ export default function Cart() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
+          {carts?.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className={`bg-primary rounded p-4 md:p-6 transition-all duration-300 ${!item.selected ? "opacity-60" : ""
                 }`}
             >
@@ -193,17 +190,17 @@ export default function Cart() {
                     <input
                       type="checkbox"
                       checked={item.selected}
-                      onChange={() => toggleItemSelection(item.id)}
+                      onChange={() => toggleItemSelection(item._id)}
                       className="w-5 h-5 text-btn2 border-gray-300 rounded focus:ring-2 focus:ring-btn2 cursor-pointer"
                     />
                   </div>
 
                   {/* Product Image */}
-                  <Link to={`/product/${item.id}`} className="shrink-0">
+                  <Link to={`/product/${item?.item.slug}`} className="shrink-0">
                     <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-100 rounded-lg overflow-hidden">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item?.item.image}
+                        alt={item?.item.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       />
                     </div>
@@ -213,13 +210,13 @@ export default function Cart() {
                 {/* Product Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between gap-2 mb-2">
-                    <Link to={`/product/${item.id}`}>
+                    <Link to={`/product/${item?.item.slug}`}>
                       <h3 className="text-sm md:text-base font-semibold text-text2 hover:text-blue-600 transition-colors duration-300 line-clamp-2">
-                        {item.name}
+                        {item?.item.name}
                       </h3>
                     </Link>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item._id)}
                       className="shrink-0 text-red-600 hover:text-red-700 p-1"
                       aria-label="Remove item"
                     >
@@ -230,12 +227,12 @@ export default function Cart() {
                   {/* Price */}
                   <div className="flex items-center flex-wrap gap-2 mb-3">
                     <span className="text-lg md:text-xl font-bold text-gray-900">
-                      Rs.{item.price.toLocaleString()}
+                      Rs.{item?.item.price.toLocaleString()}
                     </span>
-                    {item.originalPrice > item.price && (
+                    {item?.item.oldPrice > item?.item.price && (
                       <>
                         <span className="text-sm text-gray-400 line-through">
-                          Rs.{item.originalPrice.toLocaleString()}
+                          Rs.{item?.item.oldPrice.toLocaleString()}
                         </span>
                       </>
                     )}
@@ -246,7 +243,7 @@ export default function Cart() {
                     <div className="flex items-center border-2 border-gray-200 rounded-lg">
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
+                          updateQuantity(item._id, item?.item.quantity - 1)
                         }
                         className="p-2 hover:bg-gray-100 transition-colors duration-300"
                         aria-label="Decrease quantity"
@@ -254,11 +251,11 @@ export default function Cart() {
                         <LuMinus className="w-4 h-4" />
                       </button>
                       <span className="px-4 py-2 font-semibold min-w-[3rem] text-center">
-                        {item.quantity}
+                        {item?.item.quantity}
                       </span>
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
+                          updateQuantity(item._id, item?.item.quantity + 1)
                         }
                         className="p-2 hover:bg-gray-100 transition-colors duration-300"
                         aria-label="Increase quantity"
@@ -354,6 +351,7 @@ export default function Cart() {
               disabled={selectedItems.length === 0}
               classes="disabled:bg-gray-400 disabled:cursor-not-allowed w-full py-3"
               paddings={false}
+              onClick={saveDataForCheckout}
             />
 
             {/* Security Badge */}

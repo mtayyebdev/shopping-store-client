@@ -1,7 +1,8 @@
 import { useState } from "react";
-import {LuCheck } from "react-icons/lu";
+import { LuCheck } from "react-icons/lu";
 import { Button, Input } from "../components/index.js";
 import { Link } from "react-router-dom";
+import axios from 'axios'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,18 @@ export default function ForgotPassword() {
       setError("Please enter a valid email address");
       return;
     }
-    setIsSubmitted(true);
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/auth/forget-password`, {
+        email
+      });
+
+      if (res.status == 200) {
+        setIsSubmitted(true);
+      }
+    } catch (error) {
+      console.log("Something went wrong.", error);
+    }
   };
 
   if (isSubmitted) {
@@ -49,13 +61,13 @@ export default function ForgotPassword() {
               see it, check your spam folder.
             </p>
 
-            <Button 
-            value="Back to Login"
-            style="base" 
-            size="md" 
-            bg="btn2"
-            link="/login"
-            classes="rounded-lg w-full"
+            <Button
+              value="Back to Login"
+              style="base"
+              size="md"
+              bg="btn2"
+              link="/login"
+              classes="rounded-lg w-full"
             />
           </div>
         </div>
@@ -66,7 +78,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center py-10 px-4">
       <div className="w-full max-w-md">
-       <h2 className="text-3xl font-semibold mb-10 text-center">Shopping</h2>
+        <h2 className="text-3xl font-semibold mb-10 text-center">Shopping</h2>
         <div className="bg-bg rounded-2xl shadow-lg py-6 px-4">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold text-text2 mb-2">
@@ -99,7 +111,7 @@ export default function ForgotPassword() {
                 </p>
               )}
             </div>
-            <Button value="Send Reset Link" style="base" bg="btn2" size="md" onClick={handleSubmit} classes="rounded-lg w-full"/>
+            <Button value="Send Reset Link" style="base" bg="btn2" size="md" onClick={handleSubmit} classes="rounded-lg w-full" />
           </div>
 
           {/* Footer */}
