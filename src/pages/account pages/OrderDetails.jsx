@@ -14,6 +14,7 @@ function OrderDetails() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [orderData, setorderData] = useState(null)
+  const [isLoading, setisLoading] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [showReturnModal, setShowReturnModal] = useState(false)
@@ -24,7 +25,21 @@ function OrderDetails() {
   })
   const [reviewProductId, setreviewProductId] = useState(null)
   const [reviewImagePreviews, setReviewImagePreviews] = useState([])
+
   const [orderItemData, setorderItemData] = useState(null);
+  const [returnImagePreviews, setreturnImagePreviews] = useState([]);
+  const [orderReturnData, setOrderReturnData] = useState({
+    orderId: "",
+    productId: "",
+    orderItemId: "",
+    quantity: 1,
+    reason: "demaged",
+    description: "",
+    refundMethod: "wallet",
+    refundAmount: 0,
+    images: [],
+    productName: ""
+  });
 
 
   useEffect(() => {
@@ -54,22 +69,95 @@ function OrderDetails() {
     }
   }
 
-  const handleReturn = () => {
-    setShowReturnModal(true)
-  }
-
   const handleReview = () => {
     setShowReviewModal(true)
   }
 
-  const submitReturn = () => {
-    toast.success('Return request submitted successfully')
+  const submitReturn = async () => {
+    if (!orderId || !orderItemData?.product || !orderItemData?._id) {
+      toast.error("Invalid order item data");
+      return;
+    }
+    if (orderReturnData.quantity < 1 || !orderReturnData.reason || !orderReturnData.refundMethod) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("orderId", orderId);
+    formData.append("productId", orderReturnData?.productId);
+    formData.append("orderItemId", orderReturnData?.orderItemId);
+    formData.append("quantity", orderReturnData.quantity);
+    formData.append("reason", orderReturnData.reason);
+    formData.append("description", orderReturnData.description);
+    formData.append("refundMethod", orderReturnData.refundMethod);
+    formData.append("productName", orderItemData?.name);
+    formData.append("refundAmount", orderItemData?.price * Number(orderReturnData.quantity));
+    orderReturnData.images.forEach((img) => {
+      formData.append("images", img)
+    })
+
+    setisLoading(true)
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/return/create`, formData, { withCredentials: true });
+      if (res.status == 200) {
+        toast.success('Return request submitted successfully');
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message || "Something went wrong!")
+    }
+    setisLoading(false)
+    setOrderReturnData({
+      orderId: "",
+      productId: "",
+      orderItemId: "",
+      quantity: 1,
+      reason: "demaged",
+      description: "",
+      refundMethod: "wallet",
+      refundAmount: 0,
+      productName:"",
+      images: []
+    })
+
+    setreturnImagePreviews([])
     setShowReturnModal(false)
   }
 
   const orderItemDataHandler = (id) => {
     const itemdata = orderData?.items?.find((item) => item._id === id);
     setorderItemData(itemdata)
+    setOrderReturnData({
+      ...orderReturnData,
+      productId: itemdata?.product,
+      orderItemId: itemdata?._id
+    })
+  }
+
+  const handleReturnImageUpload = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length + returnImagePreviews.length > 5) {
+      toast.error('You can upload maximum 5 images')
+      return
+    }
+
+    const newReturns = files.map((file) => URL.createObjectURL(file))
+    setreturnImagePreviews([...returnImagePreviews, ...newReturns])
+    setOrderReturnData({ ...orderReturnData, images: [...newReturns, ...files] })
+  }
+
+  const removeReturnImage = (index) => {
+    const newReturns = returnImagePreviews.filter((_, i) => i !== index)
+    const newImages = orderReturnData.images.filter((_, i) => i !== index)
+    setreturnImagePreviews(newReturns)
+    setOrderReturnData({ ...orderReturnData, images: newImages })
+  }
+
+  const HandleReturnData = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+
+    setOrderReturnData({ ...orderReturnData, [name]: value })
   }
 
   const handleSubmitReview = async (e) => {
@@ -442,7 +530,7 @@ function OrderDetails() {
               {orderData.orderStatus === 'delivered' && (
                 <>
                   <button
-                    onClick={handleReturn}
+                    onClick={() => setShowReturnModal(true)}
                     className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-300"
                   >
                     <LuRotateCcw size={18} />
@@ -505,7 +593,7 @@ function OrderDetails() {
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Add Images (Optional - Max 5)
+                  Add Images (Optional - Max 4)
                 </label>
                 <input
                   type="file"
@@ -556,7 +644,7 @@ function OrderDetails() {
       {/* Return Modal */}
       {showReturnModal && (
         <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-primary rounded-lg p-6 max-w-md w-full border border-gray-200">
+          <div className="bg-primary rounded-lg overflow-scroll h-120 p-6 max-w-md w-full border border-gray-200">
             <h3 className="text-xl font-bold text-text2 mb-4">Request a Return</h3>
             <div className="mb-4">
               <label htmlFor='items' className="block text-sm font-medium text-text2 mb-2">
@@ -576,28 +664,42 @@ function OrderDetails() {
                 }
               </div>
               {
-                orderItemData && <div className='flex'>
-                  <select id="quantity">
+                orderItemData && <div className='flex mt-3 gap-3 items-center'>
+                  <select id="quantity" name='quantity' value={orderReturnData.quantity} onChange={HandleReturnData} className='w-15 outline-0 border border-gray-400 rounded-md p-1'>
                     {
                       Array.from({ length: orderItemData.quantity }).map((_, i) => (
                         <option value={i + 1} key={i}>{i + 1}</option>
                       ))
                     }
                   </select>
+                  <div className="amount">
+                    <h4 className='font-semibold text-lg'>Refund Amount: {orderItemData.price * Number(orderReturnData.quantity)}</h4>
+                  </div>
                 </div>
               }
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text2 mb-2" htmlFor='payment'>
+                Select Refund Method
+              </label>
+              <select className="w-full p-3 border border-gray-300 rounded-lg focus:border-btn2 focus:ring-2 focus:ring-btn2 focus:ring-opacity-20 outline-none" id='payment' name='refundMethod' value={orderReturnData.refundMethod} onChange={HandleReturnData}>
+                <option value="wallet">Wallet</option>
+                <option value={"bank"}>Bank</option>
+                <option value="original">Original</option>
+              </select>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-text2 mb-2" htmlFor='reason'>
                 Reason for Return
               </label>
-              <select className="w-full p-3 border border-gray-300 rounded-lg focus:border-btn2 focus:ring-2 focus:ring-btn2 focus:ring-opacity-20 outline-none" id='reason'>
-                <option>Defective Product</option>
-                <option>Not as Described</option>
-                <option>Wrong Size</option>
-                <option>Wrong Color</option>
-                <option>Changed Mind</option>
-                <option>Other</option>
+              <select className="w-full p-3 border border-gray-300 rounded-lg focus:border-btn2 focus:ring-2 focus:ring-btn2 focus:ring-opacity-20 outline-none" id='reason' name='reason' value={orderReturnData.reason} onChange={HandleReturnData}>
+                <option value="damaged">Damaged</option>
+                <option value={"not_as_described"}>Not as Described</option>
+                <option value="wrong_item">Wrong Product</option>
+                <option value={"wrong_size"}>Wrong Size</option>
+                <option value={"wrong_color"}>Wrong Color</option>
+                <option value={"change_mind"}>Changed Mind</option>
+                <option value={"other"}>Other</option>
               </select>
             </div>
             <div className="mb-4">
@@ -608,20 +710,72 @@ function OrderDetails() {
                 placeholder="Provide more details about your return..."
                 className="w-full p-3 border border-gray-300 rounded-lg focus:border-btn2 focus:ring-2 focus:ring-btn2 focus:ring-opacity-20 outline-none resize-none"
                 rows={4}
+                value={orderReturnData.description}
+                onChange={HandleReturnData}
+                name='description'
               />
+            </div>
+            {/* Image Upload */}
+            <div className='mb-4'>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Add Images (Optional - Max 5)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleReturnImageUpload}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              {returnImagePreviews.length > 0 && (
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {returnImagePreviews.map((preview, index) => (
+                    <div key={index} className="relative w-20 h-20">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        onClick={() => removeReturnImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowReturnModal(false)}
+                onClick={() => {
+                  setShowReturnModal(false);
+                  setorderItemData(null);
+                  setOrderReturnData({
+                    orderId: "",
+                    productId: "",
+                    orderItemId: "",
+                    quantity: 1,
+                    reason: "demaged",
+                    description: "",
+                    refundMethod: "wallet",
+                    refundAmount: 0,
+                    productName:"",
+                    images: []
+                  });
+                  setreturnImagePreviews([]);
+                }}
                 className="flex-1 px-4 py-2 border border-gray-300 text-text2 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={submitReturn}
+                disabled={isLoading}
                 className="flex-1 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Submit Return
+                {isLoading ? 'Submitting...' : 'Submit Return Request'}
               </button>
             </div>
           </div>

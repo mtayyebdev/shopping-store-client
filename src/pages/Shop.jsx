@@ -1,85 +1,66 @@
 import { useState, useEffect } from "react";
-import { LuSlidersHorizontal, LuX, LuChevronDown, LuStar, LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { LuSlidersHorizontal, LuX, LuChevronDown, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { ProductCard, Button } from '../components/index.js'
 import { useSearchParams } from 'react-router-dom'
 import { searchProducts } from '../store/publicSlices/ProductsSlice.jsx'
 import { useDispatch } from 'react-redux'
+import { PriceRange, Ratings, Btn, Checkbox } from '../components/filtersUI/index.js'
 
 export default function Shop() {
     const dispatch = useDispatch();
-    const search = useSearchParams()
+    const search = useSearchParams();
     const searchedValue = search[0].get("s");
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState("bestMatch");
     const [currentProducts, setcurrentProducts] = useState([]);
+    const [filters, setfilters] = useState([]);
+    const FILTER_COMPONENTS = {
+        btn: Btn,
+        checkbox: Checkbox,
+    };
+
     const productsPerPage = 10;
 
     // Filter states
-    const [priceRange, setPriceRange] = useState([0, 500000]);
-    const [selectedColors, setSelectedColors] = useState([]);
-    const [selectedSizes, setSelectedSizes] = useState([]);
-    const [selectedBrands, setSelectedBrands] = useState([]);
+    const [priceRange, setPriceRange] = useState(null);
     const [selectedRating, setSelectedRating] = useState(0);
     const [totalpages, settotalpages] = useState(0)
-    const [hasWarranty, setHasWarranty] = useState(false);
-
-    // Filter options
-    const colors = ["Black", "White", "Blue", "Red", "Green", "Yellow", "Purple", "Pink"];
-    const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-    const brands = ["Nike", "Adidas", "Puma", "Reebok", "Sony", "Samsung", "Apple"];
-
-    const handleColorToggle = (color) => {
-        setSelectedColors(prev =>
-            prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
-        );
-    };
-
-    const handleSizeToggle = (size) => {
-        setSelectedSizes(prev =>
-            prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
-        );
-    };
-
-    const handleBrandToggle = (brand) => {
-        setSelectedBrands(prev =>
-            prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
-        );
-    };
+    const [selectedValues, setselectedValues] = useState({}); // key : [values]
 
     const clearAllFilters = () => {
-        setPriceRange([0, 10000]);
-        setSelectedColors([]);
-        setSelectedSizes([]);
-        setSelectedBrands([]);
+        setPriceRange(null);
+        setselectedValues({})
         setSelectedRating(0);
-        setHasWarranty(false);
+        setCurrentPage(1);
     };
 
     useEffect(() => {
         const fetchProducts = async () => {
             const filters = {
-                minPrice: priceRange[0],
-                maxPrice: priceRange[1],
                 ratings: selectedRating,
-                color: selectedColors,
-                size: selectedSizes,
-                brand: selectedBrands,
                 sortBy,
                 page: currentPage,
-                limit: productsPerPage
+                limit: productsPerPage,
+                allFilters: selectedValues
             }
+            if (priceRange) {
+                filters.minPrice = priceRange[0];
+                filters.maxPrice = priceRange[1];
+            }
+            
             await dispatch(searchProducts({ search: searchedValue, filters }))
                 .then((res) => {
                     if (res.type === "search/fulfilled") {
                         setcurrentProducts(res.payload.data);
                         settotalpages(res.payload.totalPages);
+                        setfilters(res.payload.filters);
                     }
                 })
         };
         fetchProducts();
-    }, [searchedValue, sortBy, priceRange, selectedBrands, selectedColors, selectedSizes, selectedRating, currentPage, productsPerPage])
+    }, [searchedValue, sortBy, priceRange, selectedRating, currentPage, productsPerPage, selectedValues])
 
     return (
         <div className="min-h-screen py-6">
@@ -112,168 +93,115 @@ export default function Shop() {
                         {/* Clear All */}
                         <button
                             onClick={clearAllFilters}
-                            className="w-full text-blue-600 hover:text-blue-700 font-semibold text-sm mb-4"
+                            className="w-full text-blue-600 hover:text-blue-700 font-semibold text-sm mb-4 cursor-pointer transition-colors duration-300"
                         >
                             Clear All Filters
                         </button>
 
                         {/* Price Range */}
-                        <div className="mb-6">
-                            <h3 className="font-bold text-text2 mb-3">Price Range</h3>
-                            <div className="space-y-3">
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="10000"
-                                    value={priceRange[1]}
-                                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                                    className="w-full"
-                                />
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-text1">Rs.{priceRange[0]}</span>
-                                    <span className="text-text2 font-semibold">Rs.{priceRange[1]}</span>
-                                </div>
-                            </div>
-                        </div>
+                        <PriceRange priceRange={priceRange} setPriceRange={setPriceRange} />
 
-                        {/* Colors */}
-                        <div className="mb-6">
-                            <h3 className="font-bold text-text2 mb-3">Color</h3>
-                            <div className="grid grid-cols-4 gap-2">
-                                {colors.map((color) => (
-                                    <button
-                                        key={color}
-                                        onClick={() => handleColorToggle(color)}
-                                        className={`border-2 rounded-lg p-2 text-xs font-medium transition-all duration-300 ${selectedColors.includes(color)
-                                            ? 'border-blue-600 bg-blue-50 text-blue-600'
-                                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        {color}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {/* All filters */}
+                        {filters?.map((filter) => {
+                            const Component = FILTER_COMPONENTS[filter.type];
+                            if (!Component) return null;
 
-                        {/* Sizes */}
-                        <div className="mb-6">
-                            <h3 className="font-bold text-text2 mb-3">Size</h3>
-                            <div className="grid grid-cols-3 gap-2">
-                                {sizes.map((size) => (
-                                    <button
-                                        key={size}
-                                        onClick={() => handleSizeToggle(size)}
-                                        className={`border-2 rounded-lg py-2 text-sm font-medium transition-all duration-300 ${selectedSizes.includes(size)
-                                            ? 'border-blue-600 bg-blue-50 text-blue-600'
-                                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Brands */}
-                        <div className="mb-6">
-                            <h3 className="font-bold text-text2 mb-3">Brand</h3>
-                            <div className="space-y-2">
-                                {brands.map((brand) => (
-                                    <label key={brand} className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedBrands.includes(brand)}
-                                            onChange={() => handleBrandToggle(brand)}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <span className="text-sm text-gray-700">{brand}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
+                            return <Component
+                                key={filter.name}
+                                selectedValues={selectedValues}
+                                setSelectedValues={setselectedValues}
+                                values={filter.values}
+                                name={filter.name}
+                            />;
+                        })}
 
                         {/* Rating */}
-                        <div className="mb-6">
-                            <h3 className="font-bold text-text2 mb-3">Rating</h3>
-                            <div className="space-y-2">
-                                {[4, 3, 2, 1].map((rating) => (
-                                    <button
-                                        key={rating}
-                                        onClick={() => setSelectedRating(rating)}
-                                        className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg transition-colors duration-300 ${selectedRating === rating
-                                            ? 'bg-blue-50 text-blue-600'
-                                            : 'text-gray-700 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-1">
-                                            {[...Array(rating)].map((_, i) => (
-                                                <LuStar key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                            ))}
-                                        </div>
-                                        <span className="text-sm font-medium">& Up</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Warranty */}
-                        {/* <div className="mb-6">
-                            <h3 className="font-bold text-text2 mb-3">Warranty</h3>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={hasWarranty}
-                                    onChange={(e) => setHasWarranty(e.target.checked)}
-                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                                />
-                                <span className="text-sm text-gray-700">Has Warranty</span>
-                            </label>
-                        </div> */}
+                        <Ratings selectedRating={selectedRating} setSelectedRating={setSelectedRating} />
                     </div>
                 </div>
 
                 {/* Right - Products */}
                 <div className="lg:col-span-3">
                     {/* Top Bar - Results & Sort */}
-                    <div className="bg-primary rounded p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex gap-3 items-center">
-                            {/* Mobile Filter Button */}
-                            <Button
-                                onClick={() => setIsSidebarOpen(true)}
-                                classes="lg:hidden py-2 px-2"
-                                icon={<LuSlidersHorizontal className="w-5 h-5" />}
-                                iconPosition="left"
-                                bg="btn2"
-                                size="md"
-                                value="Filters"
-                                style="base"
-                                paddings={false}
-                            />
-                            <div>
-                                <p className="text-text2 font-semibold text-lg">
-                                    {searchedValue}
-                                </p>
-                                <p className="text-sm text-text1">
-                                    {currentProducts?.length} items found for "{searchedValue}"
-                                </p>
+                    <div className="bg-primary rounded p-4 mb-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div className="flex gap-3 items-center">
+                                {/* Mobile Filter Button */}
+                                <Button
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    classes="lg:hidden py-2 px-2"
+                                    icon={<LuSlidersHorizontal className="w-5 h-5" />}
+                                    iconPosition="left"
+                                    bg="btn2"
+                                    size="md"
+                                    value="Filters"
+                                    style="base"
+                                    paddings={false}
+                                />
+                                <div>
+                                    <p className="text-text2 font-semibold text-lg">
+                                        {searchedValue}
+                                    </p>
+                                    <p className="text-sm text-text1">
+                                        {currentProducts?.length} items found for "{searchedValue}"
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Sort By Dropdown */}
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-semibold text-gray-700">Sort By:</span>
+                                <div className="relative">
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="appearance-none bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer"
+                                    >
+                                        <option value="bestMatch">Best Match</option>
+                                        <option value="LtoH">Price: Low to High</option>
+                                        <option value="HtoL">Price: High to Low</option>
+                                    </select>
+                                    <LuChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text1 pointer-events-none" />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Sort By Dropdown */}
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm font-semibold text-gray-700">Sort By:</span>
-                            <div className="relative">
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="appearance-none bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer"
+                        {/* Applied Filters */}
+                        <div className="flex flex-wrap gap-2 items-center mt-4">
+                            {priceRange && (
+                                <button
+                                    onClick={() => setPriceRange(null)}
+                                    className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
                                 >
-                                    <option value="bestMatch">Best Match</option>
-                                    <option value="LToH">Price: Low to High</option>
-                                    <option value="HToL">Price: High to Low</option>
-                                </select>
-                                <LuChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text1 pointer-events-none" />
-                            </div>
+                                    Rs.{priceRange[0]} - Rs.{priceRange[1]}
+                                    <LuX className="w-4 h-4" />
+                                </button>
+                            )}
+                            {selectedRating > 0 && (
+                                <button
+                                    onClick={() => setSelectedRating(0)}
+                                    className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                                >
+                                    {selectedRating}★ & above
+                                    <LuX className="w-4 h-4" />
+                                </button>
+                            )}
+                            {Object.entries(selectedValues).map(([key, values]) =>
+                                values.map((value) => (
+                                    <button
+                                        key={`${key}-${value}`}
+                                        onClick={() => setselectedValues(prev => ({
+                                            ...prev,
+                                            [key]: prev[key].filter(v => v !== value)
+                                        }))}
+                                        onMouseDown={(e)=>e.preventDefault()}
+                                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                                    >
+                                        {value}
+                                        <LuX className="w-4 h-4" />
+                                    </button>
+                                ))
+                            )}
                         </div>
                     </div>
 

@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getUser } from '../../store/publicSlices/UserSlice.jsx'
 import { getCarts } from '../../store/publicSlices/CartSlice.jsx'
 import { getOrders } from "../../store/publicSlices/OrderSlice.jsx";
+import {getReturns} from '../../store/publicSlices/ReturnSlice.jsx'
+import { getWishlist } from "../../store/publicSlices/WishlistSlice.jsx";
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -28,6 +30,8 @@ export default function Header() {
     if (isLoggedIn) {
       dispatch(getCarts());
       dispatch(getOrders());
+      dispatch(getReturns());
+      dispatch(getWishlist());
     }
   }, [dispatch, isLoggedIn]);
 

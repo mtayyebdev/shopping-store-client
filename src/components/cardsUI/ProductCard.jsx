@@ -1,17 +1,33 @@
 import { LuHeart, LuStar } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { LuTrash2 } from 'react-icons/lu'
+import { useDispatch } from "react-redux";
+import { deleteWishlist, createWishlist, getWishlist } from '../../store/publicSlices/WishlistSlice.jsx';
 
-export default function ProductCard({ product, save = true, ratings = true, classes = "" }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+export default function ProductCard({ product, save = true, ratings = true, classes = "", isWishlistProduct = false,isWishlistPage = false }) {
+  const [isWishlisted, setIsWishlisted] = useState(isWishlistProduct);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const dispatch = useDispatch();
 
-  const productData = product || defaultProduct;
+  const productData = product || defaultProduct;  
 
   const handleWishlist = (e) => {
-    e.preventDefault();
-    setIsWishlisted(!isWishlisted);
-    console.log("Wishlist toggled:", productData.id);
+    e?.preventDefault();
+    setIsWishlisted(true);
+    
+    dispatch(createWishlist(productData._id))
+    .then((res) => {
+      dispatch(getWishlist());
+    })
+  };
+
+  const deleteWishlistHandler = async (e) => {
+    e?.preventDefault();
+    await dispatch(deleteWishlist(productData._id))
+      .then((res) => {
+        dispatch(getWishlist());
+      })
   };
 
   return (
@@ -32,8 +48,8 @@ export default function ProductCard({ product, save = true, ratings = true, clas
             <button
               onClick={handleWishlist}
               className={`p-2 rounded-full absolute top-1.5 right-1.5 md:top-2 md:right-3 z-10 transition-all duration-300 transform hover:scale-110 shadow-lg ${isWishlisted
-                  ? "bg-secondary2 text-white"
-                  : "bg-white text-gray-900 hover:bg-secondary2 hover:text-white"
+                ? "bg-secondary2 text-white"
+                : "bg-white text-gray-900 hover:bg-secondary2 hover:text-white"
                 }`}
               title="Add to Wishlist"
             >
@@ -43,6 +59,14 @@ export default function ProductCard({ product, save = true, ratings = true, clas
               />
             </button>
           )}
+
+          {
+            isWishlistPage && (
+              <button className="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-3 z-10 bg-white text-text2 px-1.5 py-1 md:px-2 md:py-2 text-[10px] md:text-xs font-bold rounded-md shadow-lg cursor-pointer hover:bg-red-500 hover:text-white transition-colors duration-300" onClick={deleteWishlistHandler}>
+                <LuTrash2 size={20} />
+              </button>
+            )
+          }
 
           {/* Product Image */}
           <div className="aspect-square relative">
@@ -69,13 +93,13 @@ export default function ProductCard({ product, save = true, ratings = true, clas
           {/* Price Section */}
           <div className="flex items-center gap-1 mt-1 md:gap-2 flex-wrap">
             <span className="text-base font-semibold text-secondary2">
-              Rs.{productData?.price.toLocaleString()}
+              Rs.{productData?.price?.toLocaleString()}
             </span>
             {productData?.oldPrice &&
               productData?.oldPrice > productData?.price && (
                 <>
                   <span className="text-[10px] md:text-sm text-text1 line-through">
-                    Rs.{productData?.oldPrice.toLocaleString()}
+                    Rs.{productData?.oldPrice?.toLocaleString()}
                   </span>
                 </>
               )}
@@ -106,8 +130,8 @@ export default function ProductCard({ product, save = true, ratings = true, clas
                   <LuStar
                     key={index}
                     className={`w-3 h-3 md:w-4 md:h-4 ${index < Math.floor(productData.ratings)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-text1"
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-text1"
                       }`}
                   />
                 ))}

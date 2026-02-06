@@ -7,6 +7,7 @@ import CartSlice from './publicSlices/CartSlice'
 import CouponSlice from './publicSlices/CouponSlice'
 import OrderSlice from './publicSlices/OrderSlice'
 import ReturnSlice from './publicSlices/ReturnSlice'
+import WishlistSlice from './publicSlices/WishlistSlice'
 
 // Admin slices.....
 import UsersAdminSlice from './adminSlices/UsersSlice'
@@ -20,6 +21,7 @@ export const store = configureStore({
         couponSlice: CouponSlice,
         orderSlice: OrderSlice,
         returnSlice: ReturnSlice,
+        wishlistSlice: WishlistSlice,
 
         // Admin slices......
         usersAdminSlice: UsersAdminSlice
