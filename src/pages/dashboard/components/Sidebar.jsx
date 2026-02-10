@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
 import {
     AiOutlineHome,
-    AiOutlineCalendar,
-    AiOutlineUser,
-    AiOutlineCheckSquare,
     AiOutlineDown,
-    AiOutlineBarChart,
-    AiOutlineAreaChart
 } from "react-icons/ai";
+import { LuCreditCard, LuGrid2X2, LuLogOut, LuSettings, LuShoppingCart, LuTruck, LuUsers } from 'react-icons/lu'
+import { useDispatch } from 'react-redux'
+import { logoutUser, getUser } from '../../../store/publicSlices/UserSlice'
 
 const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate()
     const [openDropdown, setOpenDropdown] = useState("");
     const location = useLocation();
 
@@ -38,7 +38,7 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
                             } ${sidebarToggle ? "justify-center" : ""}`}
                     >
                         <div className="relative group">
-                            <Icon className={`${sidebarToggle ? "w-6 h-6" : "w-5 h-5"} flex-shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`} />
+                            <Icon className={`${sidebarToggle ? "w-6 h-6" : "w-5 h-5"} shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`} />
                         </div>
                         {!sidebarToggle && (
                             <>
@@ -65,11 +65,11 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
             <NavLink
                 to={to}
                 className={({ isActive }) => `flex items-center w-full gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative group ${isActive
-                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50"
+                    ? "bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50"
                     : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                     } ${sidebarToggle ? "justify-center" : ""}`}
             >
-                <Icon className={`${sidebarToggle ? "w-6 h-6" : "w-5 h-5"} flex-shrink-0 transition-transform duration-300 group-hover:scale-110`} />
+                <Icon className={`${sidebarToggle ? "w-6 h-6" : "w-5 h-5"} shrink-0 transition-transform duration-300 group-hover:scale-110`} />
                 {!sidebarToggle && <span className="flex-1 text-left font-medium">{label}</span>}
             </NavLink>
         );
@@ -86,12 +86,19 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
             <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
             <span className="flex-1">{label}</span>
             {badge && (
-                <span className="px-2 py-0.5 text-xs font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full">
+                <span className="px-2 py-0.5 text-xs font-semibold bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-full">
                     {badge}
                 </span>
             )}
         </NavLink>
     );
+
+    const handleLogout = async () => {
+        dispatch(logoutUser())
+        await dispatch(getUser()).then((res) => {
+            navigate("/", { replace: true })
+        });
+    }
 
     return (
         <>
@@ -106,24 +113,24 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
             {/* Sidebar */}
             <aside
                 className={`z-30 fixed top-0 left-0 lg:static overflow-visible flex h-screen flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ${sidebarToggle ? "lg:w-20 -translate-x-full lg:translate-x-0" : "w-72 translate-x-0"}`}
-                onMouseEnter={() => { sidebarToggle && setSidebarToggle(false)}}
+                onMouseEnter={() => { sidebarToggle && setSidebarToggle(false) }}
             >
                 {/* Header */}
                 <div className={`flex items-center h-20 px-4 ${sidebarToggle ? "justify-center" : "justify-between"}`}>
                     {!sidebarToggle && (
-                        <NavLink to="/web-admin" className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">A</span>
+                        <Link to="/web-admin" className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">S</span>
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Admin</h1>
+                                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Shopping</h1>
                                 <p className="text-xs text-gray-500">Dashboard</p>
                             </div>
-                        </NavLink>
+                        </Link>
                     )}
 
                     {sidebarToggle && (
-                        <NavLink to="/web-admin" className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <NavLink to="/web-admin" className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                             <span className="text-white font-bold text-lg">A</span>
                         </NavLink>
                     )}
@@ -137,76 +144,67 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
                         </h3>
                     )}
 
-                    {/* Dashboard with Dropdown */}
                     <MenuItem
+                        to={"/web-admin"}
                         icon={AiOutlineHome}
-                        label="Dashboard"
+                        label={"Dashboard"}
+                    />
+
+                    <MenuItem
+                        icon={LuGrid2X2}
+                        label={"Products"}
                         hasDropdown={true}
-                        dropdownRoutes={["/web-admin", "/analytics", "/marketing", "/crm", "/stocks"]}
+                        dropdownRoutes={["/web-admin/products", "/web-admin/create-product"]}
                     >
-                        <DropdownItem to="/web-admin" label="eCommerce" />
-                        <DropdownItem to="/analytics" label="Analytics" badge="Pro" />
-                        <DropdownItem to="/marketing" label="Marketing" />
-                        <DropdownItem to="/crm" label="CRM" />
-                        <DropdownItem to="/stocks" label="Stocks" />
+                        <DropdownItem to={"/web-admin/products"} label={"Products"} />
+                        <DropdownItem to={"/web-admin/create-product"} label={"Create Product"} />
                     </MenuItem>
 
-                    {/* Calendar */}
                     <MenuItem
-                        icon={AiOutlineCalendar}
-                        label="Calendar"
-                        to="/calendar"
+                        icon={LuUsers}
+                        label="Customers"
+                        to="/web-admin/customers"
                     />
 
-                    {/* Profile */}
                     <MenuItem
-                        icon={AiOutlineUser}
-                        label="User Profile"
-                        to="/profile"
+                        icon={LuShoppingCart}
+                        label="Orders"
+                        to="/web-admin/orders"
                     />
 
-                    {/* Task with Dropdown */}
                     <MenuItem
-                        icon={AiOutlineCheckSquare}
-                        label="Task"
-                        hasDropdown={true}
-                        dropdownRoutes={["/task-list", "/task-kanban"]}
+                        icon={LuTruck}
+                        label="Shipments"
+                        to="/web-admin/shipments"
+                    />
+
+                    <MenuItem
+                        icon={LuCreditCard}
+                        label="Transactions"
+                        to="/web-admin/transactions"
+                    />
+
+                    <MenuItem
+                        icon={LuSettings}
+                        label="Settings"
+                        to="/web-admin/settings"
+                    />
+
+                    <button
+                        onClick={handleLogout}
+                        className={`flex items-center w-full gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:bg-gray-100 ${sidebarToggle ? "justify-center" : ""} group`}
                     >
-                        <DropdownItem to="/task-list" label="List" />
-                        <DropdownItem to="/task-kanban" label="Kanban" />
-                    </MenuItem>
-
-                    {/* Analytics */}
-                    <MenuItem
-                        icon={AiOutlineBarChart}
-                        label="Analytics"
-                        to="/analytics-page"
-                    />
-
-                    {/* Reports */}
-                    <MenuItem
-                        icon={AiOutlineAreaChart}
-                        label="Reports"
-                        to="/reports"
-                    />
+                        <div className="relative">
+                            <LuLogOut className={`${sidebarToggle ? "w-6 h-6" : "w-5 h-5"} shrink-0 transition-transform duration-300 group-hover:scale-110`} />
+                        </div>
+                        {!sidebarToggle && (
+                            <>
+                                <span className="flex-1 text-left font-medium">Logout</span>
+                            </>
+                        )}
+                    </button>
                 </nav>
 
-                {/* Footer */}
-                {!sidebarToggle && (
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                                JD
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                    John Doe
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">john@example.com</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </aside>
 
         </>

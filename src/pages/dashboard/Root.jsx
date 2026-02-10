@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { Sidebar, Header } from './components/index.js'
-import {
-  AiOutlineShoppingCart,
-} from "react-icons/ai";
+import { Outlet } from 'react-router-dom';
 
 function Dashboard() {
   const [sidebarToggle, setSidebarToggle] = useState(false);
@@ -21,16 +19,8 @@ function Dashboard() {
           {/* Header End  */}
 
           {/* Main Content Start */}
-          <main>
-            <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-              <div className="grid grid-cols-12 gap-4 md:gap-6">
-                <div className="col-span-12 space-y-6 xl:col-span-7"></div>
-                <div className="col-span-12 xl:col-span-5"></div>
-                <div className="col-span-12"></div>
-                <div className="col-span-12 xl:col-span-5"></div>
-                <div className="col-span-12 xl:col-span-7"></div>
-              </div>
-            </div>
+          <main className='p-3'>
+            <Outlet/>
           </main>
           {/* Main Content End  */}
         </div>

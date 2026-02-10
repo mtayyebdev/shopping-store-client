@@ -13,6 +13,7 @@ import { Navigation, Autoplay } from "swiper/modules";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { useDispatch, useSelector } from 'react-redux'
 import { getProducts, getFeatured, getNewArrivals, getPopular, getTopRated } from '../store/publicSlices/ProductsSlice.jsx'
+import {getCategories} from '../store/publicSlices/CategorySlice.jsx'
 
 // Import Swiper styles
 import "swiper/css";
@@ -28,6 +29,7 @@ function Home() {
     newArrivals,
     topRatedProducts
   } = useSelector((state) => state.productsSlice);
+  const { categories } = useSelector((state) => state.categorySlice);
 
   const dispatchProducts = () => {
     dispatch(getProducts());
@@ -35,70 +37,12 @@ function Home() {
     dispatch(getNewArrivals());
     dispatch(getPopular());
     dispatch(getTopRated());
+    dispatch(getCategories());
   }
 
   useEffect(() => {
     dispatchProducts();
   }, [dispatch])
-
-  const categories = [
-    {
-      id: 1,
-      name: "Electronics",
-      image:
-        "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=500&q=80",
-      slug: "electronics",
-    },
-    {
-      id: 2,
-      name: "Fashion",
-      image:
-        "https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&q=80",
-      slug: "fashion",
-    },
-    {
-      id: 3,
-      name: "Home & Living",
-      image:
-        "https://images.unsplash.com/photo-1556912167-f556f1f39faa?w=500&q=80",
-      slug: "home-living",
-    },
-    {
-      id: 4,
-      name: "Sports",
-      image:
-        "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=80",
-      slug: "sports",
-    },
-    {
-      id: 5,
-      name: "Beauty",
-      image:
-        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80",
-      slug: "beauty",
-    },
-    {
-      id: 6,
-      name: "Books",
-      image:
-        "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&q=80",
-      slug: "books",
-    },
-    {
-      id: 7,
-      name: "Toys & Games",
-      image:
-        "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=500&q=80",
-      slug: "toys",
-    },
-    {
-      id: 8,
-      name: "Groceries",
-      image:
-        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
-      slug: "groceries",
-    },
-  ];
 
   return (
     <div className="">

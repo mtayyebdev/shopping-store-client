@@ -19,7 +19,8 @@ import {
   Shop,
   OrderDetails
 } from "../pages/index.js";
-import { Dashboard } from '../pages/dashboard/index.js'
+import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, Shipments, Transactions, ProfileDashboard } from '../pages/dashboard/index.js'
+import { ProtectedRoute, AdminRoute } from "../components/index.js";
 
 const router = createBrowserRouter([
   {
@@ -31,15 +32,15 @@ const router = createBrowserRouter([
         path: "",
       },
       {
-        element: <Cart />,
+        element: <ProtectedRoute><Cart /></ProtectedRoute>,
         path: "/cart"
       },
       {
-        element: <Checkout />,
+        element: <ProtectedRoute><Checkout /></ProtectedRoute>,
         path: "/checkout"
       },
       {
-        element: <Payment />,
+        element: <ProtectedRoute><Payment /></ProtectedRoute>,
         path: "/payment/:orderid"
       },
       {
@@ -51,31 +52,31 @@ const router = createBrowserRouter([
         path: "/shop"
       },
       {
-        element: <Account />,
+        element: <ProtectedRoute><Account /></ProtectedRoute>,
         path: "/account",
         children: [
           {
-            element: <Profile />,
+            element: <ProtectedRoute><Profile /></ProtectedRoute>,
             path: ""
           },
           {
-            element: <Address />,
+            element: <ProtectedRoute><Address /></ProtectedRoute>,
             path: "address"
           },
           {
-            element: <Order />,
+            element: <ProtectedRoute><Order /></ProtectedRoute>,
             path: "orders"
           },
           {
-            element: <Returns />,
+            element: <ProtectedRoute><Returns /></ProtectedRoute>,
             path: "returns"
           },
           {
-            element: <Wishlist />,
+            element: <ProtectedRoute><Wishlist /></ProtectedRoute>,
             path: "wishlist"
           },
           {
-            element: <OrderDetails />,
+            element: <ProtectedRoute><OrderDetails /></ProtectedRoute>,
             path: "order/:orderId"
           }
         ]
@@ -99,14 +100,51 @@ const router = createBrowserRouter([
     path: "reset-password/:token",
   },
   {
-    element:<Dashboard/>,
-    path:"web-admin",
-    // children:[
-    //   {
-    //     element:
-    //   }
-    // ]
-  }
+    element: <AdminRoute><Root /></AdminRoute>,
+    path: "web-admin",
+    children: [
+      {
+        element: <Dashboard />,
+        path: ""
+      },
+      {
+        element: <Products />,
+        path: "products"
+      },
+      {
+        element: <CreateProduct />,
+        path: "create-product"
+      },
+      {
+        element: <Orders />,
+        path: "orders"
+      },
+      {
+        element: <Shipments />,
+        path: "shipments"
+      },
+      {
+        element: <Customers />,
+        path: "customers"
+      },
+      {
+        element: <Notifications />,
+        path: "notifications"
+      },
+      {
+        element: <Settings />,
+        path: "settings"
+      },
+      {
+        element: <Transactions />,
+        path: "transactions"
+      },
+      {
+        element: <ProfileDashboard />,
+        path: "profile"
+      },
+    ]
+  },
 ]);
 
 export default router;

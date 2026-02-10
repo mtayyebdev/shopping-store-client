@@ -1,18 +1,23 @@
 import { useState } from "react";
-import { 
+import {
   AiOutlineMenu,
   AiOutlineClose,
   AiOutlineSearch,
   AiOutlineBell,
   AiOutlineUser,
   AiOutlineSetting,
-  AiOutlineQuestionCircle,
   AiOutlineLogout,
   AiOutlineMore,
   AiOutlineDown
 } from "react-icons/ai";
+import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate, Link } from 'react-router-dom'
+import { logoutUser, getUser } from '../../../store/publicSlices/UserSlice'
 
 const Header = ({ sidebarToggle, setSidebarToggle }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.userSlice);
   const [menuToggle, setMenuToggle] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -68,19 +73,25 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
     console.log("Search:", searchValue);
   };
 
+  const handleLogout = async () => {
+    dispatch(logoutUser())
+    await dispatch(getUser()).then((res) => {
+      navigate("/", { replace: true })
+    });
+  }
+
   return (
-    <header className="sticky top-0 z-[99999] flex w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
+    <header className="sticky top-0 z-99999 flex w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex grow flex-col items-center justify-between md:flex-row md:px-6">
         {/* Top Section */}
-        <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-gray-800">
+        <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal md:border-b-0 md:px-0 md:py-4 dark:border-gray-800">
           {/* Hamburger Toggle Button */}
           <button
             onClick={() => setSidebarToggle(!sidebarToggle)}
-            className={`z-[99999] flex h-10 w-10 items-center justify-center rounded-lg border text-gray-500 transition-all duration-200 lg:h-11 lg:w-11 dark:text-gray-400 ${
-              sidebarToggle
-                ? "bg-gray-100 lg:bg-transparent dark:bg-gray-800 dark:lg:bg-transparent"
-                : "border-gray-200 dark:border-gray-800"
-            }`}
+            className={`z-99999 flex h-10 w-10 items-center justify-center rounded-lg border text-gray-500 transition-all duration-200 lg:h-11 lg:w-11 dark:text-gray-400 ${sidebarToggle
+              ? "bg-gray-100 lg:bg-transparent dark:bg-gray-800 dark:lg:bg-transparent"
+              : "border-gray-200 dark:border-gray-800"
+              }`}
           >
             <svg
               className="hidden fill-current lg:block"
@@ -99,25 +110,24 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
             </svg>
 
             {sidebarToggle ? (
-            <AiOutlineMenu className="block lg:hidden w-6 h-6" />
+              <AiOutlineMenu className="block lg:hidden w-6 h-6" />
             ) : (
               <AiOutlineClose className="block lg:hidden w-6 h-6" />
             )}
           </button>
 
           {/* Logo - Mobile */}
-          <a href="/" className="lg:hidden">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+          <Link href="/" className="lg:hidden">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">S</span>
             </div>
-          </a>
+          </Link>
 
           {/* Application Menu Button - Mobile */}
           <button
             onClick={() => setMenuToggle(!menuToggle)}
-            className={`z-[99999] flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 transition-all duration-200 lg:hidden dark:text-gray-400 ${
-              menuToggle ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
+            className={`z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 transition-all duration-200 md:hidden dark:text-gray-400 ${menuToggle ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
           >
             <AiOutlineMore className="w-6 h-6" />
           </button>
@@ -136,11 +146,11 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSearch(e);
                 }}
-                className="h-11 w-full xl:w-[430px] rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-3 focus:ring-blue-500/10 focus:border-blue-300 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-800 transition-all duration-200"
+                className="h-11 w-full xl:w-107.5 rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-3 focus:ring-blue-500/10 focus:border-blue-300 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-800 transition-all duration-200"
               />
               <button
                 type="button"
-                className="absolute top-1/2 right-2.5 -translate-y-1/2 inline-flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400"
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 inline-flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-1.75 py-[4.5px] text-xs text-gray-500 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400"
               >
                 <span>⌘</span>
                 <span>K</span>
@@ -151,11 +161,10 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
 
         {/* Bottom Section */}
         <div
-          className={`w-full items-center justify-between gap-4 px-5 py-4 lg:flex lg:justify-end lg:px-0 lg:shadow-none shadow-lg transition-all duration-300 ${
-            menuToggle ? "flex" : "hidden"
-          }`}
+          className={`w-full items-center justify-between gap-4 px-5 py-4 md:flex md:justify-end md:px-0 md:shadow-none shadow-lg transition-all duration-300 ${menuToggle ? "flex" : "hidden"
+            }`}
         >
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 z-50">
             {/* Notification Dropdown */}
             <div className="relative">
               <button
@@ -175,7 +184,7 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
 
               {/* Notification Dropdown */}
               {notificationOpen && (
-                <div className="absolute -right-[240px] sm:right-0 mt-4 flex h-[480px] w-[350px] sm:w-[361px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute -right-60 md:right-0 mt-4 flex h-120 w-70 flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3 dark:border-gray-800">
                     <h5 className="text-lg font-semibold text-gray-800 dark:text-white/90">
                       Notification
@@ -191,22 +200,10 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
                   <ul className="flex h-auto flex-col overflow-y-auto custom-scrollbar">
                     {notifications.map((notif) => (
                       <li key={notif.id}>
-                        <a
-                          href="#"
-                          className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 transition-all duration-200"
+                        <Link
+                          to="#"
+                          className="flex gap-3 rounded-lg border-b border-gray-100 px-1 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 transition-all duration-200"
                         >
-                          <span className="relative z-1 block h-10 w-full max-w-10 rounded-full">
-                            <img
-                              src={notif.avatar}
-                              alt={notif.user}
-                              className="overflow-hidden rounded-full"
-                            />
-                            <span
-                              className={`absolute right-0 bottom-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white dark:border-gray-900 ${
-                                notif.online ? "bg-green-500" : "bg-red-500"
-                              }`}
-                            ></span>
-                          </span>
 
                           <span className="block">
                             <span className="mb-1.5 block text-sm text-gray-500 dark:text-gray-400">
@@ -225,84 +222,74 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
                               <span>{notif.time}</span>
                             </span>
                           </span>
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
 
-                  <a
-                    href="#"
-                    className="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 transition-all duration-200"
+                  <Link
+                    to="/web-admin/notifications"
+                    className="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3 dark:hover:text-gray-200 transition-all duration-200"
                   >
                     View All Notification
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
           </div>
 
           {/* User Dropdown */}
-          <div className="relative">
+          <div className="relative z-50">
             <button
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
               className="flex items-center text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors duration-200"
             >
               <span className="mr-3 h-11 w-11 overflow-hidden rounded-full ring-2 ring-transparent hover:ring-blue-500/20 transition-all duration-200">
-                <img src="https://i.pravatar.cc/150?img=5" alt="User" />
+                <img src={user?.avatar?.url} alt="User" />
               </span>
 
-              <span className="block text-sm font-medium mr-1">Musharof</span>
+              <span className="block text-sm font-medium mr-1">{user?.name?.split(" ")[0]}</span>
 
               <AiOutlineDown
-                className={`w-4 h-4 transition-transform duration-200 ${
-                  userDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
             {/* User Dropdown Menu */}
             {userDropdownOpen && (
-              <div className="absolute right-0 mt-4 flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-4 flex w-65 flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="pb-3">
                   <span className="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Musharof Chowdhury
+                    {user?.name}
                   </span>
                   <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
-                    randomuser@pimjo.com
+                    {user?.email}
                   </span>
                 </div>
 
                 <ul className="flex flex-col gap-1 border-b border-gray-200 pt-4 pb-3 dark:border-gray-800">
                   <li>
-                    <a
-                      href="/profile"
+                    <Link
+                      to="/web-admin/profile"
                       className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 transition-all duration-200"
                     >
                       <AiOutlineUser className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
                       Edit profile
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="/settings"
+                    <Link
+                      to="/web-admin/settings"
                       className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 transition-all duration-200"
                     >
                       <AiOutlineSetting className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
                       Account settings
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/support"
-                      className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 transition-all duration-200"
-                    >
-                      <AiOutlineQuestionCircle className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                      Support
-                    </a>
+                    </Link>
                   </li>
                 </ul>
 
-                <button className="group mt-3 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 transition-all duration-200">
+                <button className="group mt-3 cursor-pointer flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 transition-all duration-200" onClick={handleLogout}>
                   <AiOutlineLogout className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
                   Sign out
                 </button>
@@ -365,47 +352,3 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
 };
 
 export default Header
-
-// // Demo App Component
-// const App = () => {
-//   const [sidebarToggle, setSidebarToggle] = useState(false);
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 dark:bg-black">
-//       <Header sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} />
-      
-//       {/* Demo Content */}
-//       <div className="p-8 lg:p-12">
-//         <div className="max-w-7xl mx-auto">
-//           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-//             Header Component Demo
-//           </h1>
-//           <p className="text-gray-600 dark:text-gray-400 mb-8">
-//             Animated header with search, notifications, dark mode, and user menu.
-//           </p>
-          
-//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//             {[1, 2, 3, 4, 5, 6].map((i) => (
-//               <div
-//                 key={i}
-//                 className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800"
-//               >
-//                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
-//                   <span className="text-white font-bold">{i}</span>
-//                 </div>
-//                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-//                   Card {i}
-//                 </h3>
-//                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-//                   Sample content for demonstration purposes
-//                 </p>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default App;

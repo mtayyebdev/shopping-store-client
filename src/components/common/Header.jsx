@@ -2,15 +2,9 @@ import { useState, useEffect } from "react";
 import { LuSearch, LuShoppingCart, LuUser, LuMenu, LuX, LuHeart } from "react-icons/lu";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../index.js";
-import { useDispatch, useSelector } from 'react-redux'
-import { getUser } from '../../store/publicSlices/UserSlice.jsx'
-import { getCarts } from '../../store/publicSlices/CartSlice.jsx'
-import { getOrders } from "../../store/publicSlices/OrderSlice.jsx";
-import {getReturns} from '../../store/publicSlices/ReturnSlice.jsx'
-import { getWishlist } from "../../store/publicSlices/WishlistSlice.jsx";
+import { useSelector } from 'react-redux'
 
 export default function Header() {
-  const dispatch = useDispatch();
   const navigate = useNavigate()
   const { user, isLoggedIn } = useSelector((state) => state.userSlice);
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,17 +17,6 @@ export default function Header() {
       navigate(`/shop?s=${searchQuery}`)
     }
   };
-
-  useEffect(() => {
-    dispatch(getUser());
-
-    if (isLoggedIn) {
-      dispatch(getCarts());
-      dispatch(getOrders());
-      dispatch(getReturns());
-      dispatch(getWishlist());
-    }
-  }, [dispatch, isLoggedIn]);
 
   const { carts } = useSelector((state) => state.cartSlice);
 

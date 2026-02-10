@@ -3,9 +3,12 @@ import { Button, Input } from "../components/index.js";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from 'react-toastify'
+import { useDispatch } from "react-redux";
+import { getUser } from "../store/publicSlices/UserSlice.jsx";
 
 function SignIn() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch=useDispatch()
 
   const [data, setData] = useState({
     email: "",
@@ -40,7 +43,8 @@ function SignIn() {
       )
 
       if (res.status == 200) {
-        toast.success("Login successfully.")
+        toast.success("Login successfully.");
+        dispatch(getUser())
         navigate("/")
       }
     } catch (error) {

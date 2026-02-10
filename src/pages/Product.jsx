@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getSingleProduct, getRelated } from '../store/publicSlices/ProductsSlice.jsx'
 import { addToCart, getCarts } from '../store/publicSlices/CartSlice.jsx'
 import { setCheckoutData } from '../store/publicSlices/OrderSlice.jsx'
+import { toast } from "react-toastify";
 
 export default function Product() {
   const { slug } = useParams();
@@ -32,7 +33,7 @@ export default function Product() {
         if (res.type === "addtocart/fulfilled") {
           dispatch(getCarts());
         } else {
-          alert("Failed to add product to cart. Please try again.");
+          toast.error("Failed to add product to cart. Please try again.");
         }
       });
   };

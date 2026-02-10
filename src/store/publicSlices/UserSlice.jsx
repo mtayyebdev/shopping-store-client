@@ -33,24 +33,33 @@ const userSlice = createSlice({
     initialState: {
         user: null,
         isLoggedIn: false,
-        loading: false,
+        // Start in loading state so protected routes can wait for auth check.
+        loading: true,
         err: null
     },
     extraReducers: (builder) => {
         builder
+            .addCase(getUser.pending, (state) => {
+                state.loading = true;
+                state.err = null;
+            })
             // FullFilled states........
             .addCase(getUser.fulfilled, (state, action) => {
                 state.user = action?.payload?.data || null;
                 state.isLoggedIn = action?.payload?.success || false;
+                state.loading = false;
             })
             .addCase(getUser.rejected, (state, action) => {
                 state.user = null;
                 state.isLoggedIn = false;                
+                state.loading = false;
+                state.err = action?.payload || action?.error?.message || null;
             })
             .addCase(logoutUser.fulfilled, (state, action) => {
                 toast.success(action.payload.message);
                 state.user = null;
                 state.isLoggedIn = false;
+                state.loading = false;
             })
     }
 })

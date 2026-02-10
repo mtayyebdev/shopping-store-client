@@ -10,6 +10,7 @@ export default function Shop() {
     const dispatch = useDispatch();
     const search = useSearchParams();
     const searchedValue = search[0].get("s");
+    const categoryValue = search[0].get("c");
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +51,7 @@ export default function Shop() {
                 filters.maxPrice = priceRange[1];
             }
             
-            await dispatch(searchProducts({ search: searchedValue, filters }))
+            await dispatch(searchProducts({ search: searchedValue, category: categoryValue, filters }))
                 .then((res) => {
                     if (res.type === "search/fulfilled") {
                         setcurrentProducts(res.payload.data);

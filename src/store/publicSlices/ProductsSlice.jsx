@@ -72,9 +72,9 @@ export const getTopRated = createAsyncThunk("gettoprated", async (data, { reject
 })
 
 // search products /search
-export const searchProducts = createAsyncThunk("search", async ({ search, filters }, { rejectWithValue }) => {
+export const searchProducts = createAsyncThunk("search", async ({ search,category, filters }, { rejectWithValue }) => {
     try {
-        const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/product/search?s=${search}`, filters);
+        const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/product/search?s=${search}&c=${category}`, filters);
         return res.data
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);
