@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { LuStar, LuShoppingCart, LuHeart } from "react-icons/lu";
 import { Button, Heading, ProductCard } from "../components/index.js";
 import { useDispatch, useSelector } from 'react-redux'
+import { getPlainHTML } from '../custom methods/index.js'
 import { getSingleProduct, getRelated } from '../store/publicSlices/ProductsSlice.jsx'
 import { addToCart, getCarts } from '../store/publicSlices/CartSlice.jsx'
 import { setCheckoutData } from '../store/publicSlices/OrderSlice.jsx'
@@ -176,7 +177,7 @@ export default function Product() {
 
             {/* Short Description */}
             <p className="leading-relaxed mb-4 text-text1">
-              {product?.shortDesc}
+              {getPlainHTML(product?.shortDesc)}
             </p>
 
             {/* Color & Size Selection */}
@@ -282,6 +283,14 @@ export default function Product() {
                   {product?.returned} days
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700">Tags:</span>
+                <div className="flex items-center flex-wrap gap-1">
+                  {product?.tags?.map((t, i) => (
+                    <span key={i} className="text-gray-700 font-semibold px-1.5 py-1 rounded bg-gray-300">{t}</span>
+                  ))}
+                </div>
+              </div>
               {/* <div className="flex items-center gap-2">
                 <span className="font-semibold text-gray-700">Warranty:</span>
                 <span className="text-gray-900 font-semibold">
@@ -298,7 +307,7 @@ export default function Product() {
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
           Product Description
         </h2>
-        <p className="text-gray-700 leading-relaxed">{product?.longDesc}</p>
+        <p className="text-gray-700 leading-relaxed">{getPlainHTML(product?.longDesc)}</p>
       </div>
 
       {/* Specifications */}
@@ -309,8 +318,8 @@ export default function Product() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {product?.specifications?.map((spec, i) => (
             <div key={i} className="flex border-b border-gray-200 py-2">
-              <span className="font-semibold text-gray-700 w-1/2">{spec.key}</span>
-              <span className="text-gray-900 w-1/2">{spec.value}</span>
+              <span className="font-semibold text-gray-700 w-1/2">{spec?.label}</span>
+              <span className="text-gray-900 w-1/2">{spec?.content}</span>
             </div>
           ))}
         </div>

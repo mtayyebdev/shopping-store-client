@@ -7,7 +7,7 @@ function Dashboard() {
   return (
     <>
       {/* Page Wrapper Start */}
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden max-w-384 mx-auto">
         {/* Sidebar Start */}
         <Sidebar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} />
         {/* Sidebar End  */}
@@ -19,8 +19,8 @@ function Dashboard() {
           {/* Header End  */}
 
           {/* Main Content Start */}
-          <main className='p-3'>
-            <Outlet/>
+          <main className='p-5 bg-[#f0f4f7]'>
+            <Outlet />
           </main>
           {/* Main Content End  */}
         </div>

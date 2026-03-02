@@ -19,7 +19,7 @@ import {
   Shop,
   OrderDetails
 } from "../pages/index.js";
-import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, Shipments, Transactions, ProfileDashboard } from '../pages/dashboard/index.js'
+import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, Shipments, Transactions, Coupons, ReturnsDashboard,Categories } from '../pages/dashboard/index.js'
 import { ProtectedRoute, AdminRoute } from "../components/index.js";
 
 const router = createBrowserRouter([
@@ -140,9 +140,17 @@ const router = createBrowserRouter([
         path: "transactions"
       },
       {
-        element: <ProfileDashboard />,
-        path: "profile"
+        element: <Coupons />,
+        path: "coupons"
       },
+      {
+        element: <ReturnsDashboard />,
+        path: "returns"
+      },
+      {
+        element:<Categories/>,
+        path:"categories"
+      }
     ]
   },
 ]);

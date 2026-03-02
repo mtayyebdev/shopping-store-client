@@ -33,9 +33,29 @@ const userSlice = createSlice({
     initialState: {
         user: null,
         isLoggedIn: false,
-        // Start in loading state so protected routes can wait for auth check.
+        currency: {
+            symbol: "Rs.",
+            name: "PKR",
+            position: "left",
+            decimal: 0,
+            thousandSeparator: ",",
+            decimalSeparator: "."
+        },
+        language: {
+            code: "en",
+            name: "English",
+            direction: "ltr"
+        },
         loading: true,
         err: null
+    },
+    reducers: {
+        changeCurrency: (state, action) => {
+            state.currency = action.payload;
+        },
+        changeLanguage: (state, action) => {
+            state.language = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -51,7 +71,7 @@ const userSlice = createSlice({
             })
             .addCase(getUser.rejected, (state, action) => {
                 state.user = null;
-                state.isLoggedIn = false;                
+                state.isLoggedIn = false;
                 state.loading = false;
                 state.err = action?.payload || action?.error?.message || null;
             })

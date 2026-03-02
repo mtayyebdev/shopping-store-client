@@ -18,7 +18,7 @@ function Profile() {
     const [phone, setphone] = useState(user?.phone)
     const [gender, setgender] = useState(user?.gender)
     const [dateOfBirth, setdateOfBirth] = useState(user?.birthDay);
-    const [avatar, setavatar] = useState(user?.avatar?.url || "");
+    const [avatar, setavatar] = useState(user?.avatar?.url || "/avatar.png");
 
     // Password states
     const [currentPassword, setcurrentPassword] = useState("");
@@ -158,7 +158,7 @@ function Profile() {
                             <option value="female">Female</option>
                             <option value="other" defaultChecked={true}>Other</option>
                         </select>
-                        <h3 className='text-base font-semibold'>Your current gender: {gender}</h3>
+                        <h3 className='text-base mt-1 font-semibold'>Your current gender: {gender}</h3>
                     </div>
                     <div>
                         <Input
@@ -171,7 +171,7 @@ function Profile() {
                             value={dateOfBirth}
                             onChange={(e) => setdateOfBirth(e.target.value)}
                         />
-                        <h3 className='text-base font-semibold'>Your current DOB: {dateOfBirth || "undefined"}</h3>
+                        <h3 className='text-base mt-1 font-semibold'>Your current DOB: {dateOfBirth || "Not set"}</h3>
                     </div>
                 </div>
                 <div className="mt-6">

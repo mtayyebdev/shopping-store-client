@@ -84,7 +84,7 @@ export default function Header() {
             {/* Profile Icon */}
             {isLoggedIn ? (
               <Link to={'/account'} className="w-8 h-8 rounded-full overflow-hidden">
-                <img src={user?.avatar?.url} alt="" className="object-center" />
+                <img src={user?.avatar?.url || "/avatar.png"} alt="" className="object-center" />
               </Link>
             ) : (
               <Button

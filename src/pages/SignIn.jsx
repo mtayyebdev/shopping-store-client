@@ -5,10 +5,11 @@ import axios from "axios";
 import { toast } from 'react-toastify'
 import { useDispatch } from "react-redux";
 import { getUser } from "../store/publicSlices/UserSlice.jsx";
+import { IoMdClose } from "react-icons/io";
 
 function SignIn() {
   const navigate = useNavigate();
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
 
   const [data, setData] = useState({
     email: "",
@@ -48,9 +49,9 @@ function SignIn() {
         navigate("/")
       }
     } catch (error) {
-      if(error.status===500){
+      if (error.status === 500) {
         toast.error("Server error. Please try again later.")
-      }else{
+      } else {
         setError(error?.response?.data?.message);
       }
     }
@@ -60,7 +61,13 @@ function SignIn() {
     <>
       <div className="container-full bg-secondary flex items-center justify-center flex-col w-full h-screen p-4">
         <h2 className="text-3xl font-semibold mb-10">Shopping</h2>
-        <div className="max-w-md w-full bg-bg rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
+        <div className="relative max-w-md w-full bg-bg rounded-2xl py-6 pb-7 px-4 sm:px-6 shadow-lg">
+          <button
+            onClick={() => navigate("/")}
+            className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-red-500 transition-all duration-200 cursor-pointer"
+          >
+            <IoMdClose />
+          </button>
           <h2 className="text-xl sm:text-2xl font-semibold">Login Your Account</h2>
           <Input
             value={data.email}

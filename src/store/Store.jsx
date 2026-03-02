@@ -12,6 +12,11 @@ import CategorySlice from './publicSlices/CategorySlice'
 
 // Admin slices.....
 import UsersAdminSlice from './adminSlices/UsersSlice'
+import ProductsAdminSlice from './adminSlices/ProductsSlice'
+import CategoryAdminSlice from './adminSlices/CategorySlice'
+import CouponsAdminSlice from './adminSlices/CouponsSlice'
+import OrdersAdminSlice from './adminSlices/OrdersSlice'
+import ReturnsAdminSlice from './adminSlices/ReturnsSlice'
 
 export const store = configureStore({
     reducer: {
@@ -26,6 +31,11 @@ export const store = configureStore({
         categorySlice: CategorySlice,
 
         // Admin slices......
-        usersAdminSlice: UsersAdminSlice
+        usersAdminSlice: UsersAdminSlice,
+        productsAdminSlice: ProductsAdminSlice,
+        categoryAdminSlice: CategoryAdminSlice,
+        couponsAdminSlice: CouponsAdminSlice,
+        ordersAdminSlice: OrdersAdminSlice,
+        returnsAdminSlice: ReturnsAdminSlice
     }
 })

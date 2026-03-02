@@ -5,6 +5,8 @@ import {
     AiOutlineDown,
 } from "react-icons/ai";
 import { LuCreditCard, LuGrid2X2, LuLogOut, LuSettings, LuShoppingCart, LuTruck, LuUsers } from 'react-icons/lu'
+import { TbTruckReturn } from "react-icons/tb";
+import { RiCoupon2Fill } from "react-icons/ri";
 import { useDispatch } from 'react-redux'
 import { logoutUser, getUser } from '../../../store/publicSlices/UserSlice'
 
@@ -64,6 +66,7 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
         return (
             <NavLink
                 to={to}
+                end={to === "/web-admin"}
                 className={({ isActive }) => `flex items-center w-full gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative group ${isActive
                     ? "bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50"
                     : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -158,6 +161,7 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
                     >
                         <DropdownItem to={"/web-admin/products"} label={"Products"} />
                         <DropdownItem to={"/web-admin/create-product"} label={"Create Product"} />
+                        <DropdownItem to={"/web-admin/categories"} label={"Categories"} />
                     </MenuItem>
 
                     <MenuItem
@@ -170,6 +174,18 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
                         icon={LuShoppingCart}
                         label="Orders"
                         to="/web-admin/orders"
+                    />
+
+                    <MenuItem
+                        icon={RiCoupon2Fill}
+                        label="Coupons"
+                        to="/web-admin/coupons"
+                    />
+
+                    <MenuItem
+                        icon={TbTruckReturn}
+                        label="Returns"
+                        to="/web-admin/returns"
                     />
 
                     <MenuItem

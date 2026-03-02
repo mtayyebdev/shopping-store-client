@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { useEffect } from "react";
 import "./index.css";
+import "quill/dist/quill.snow.css";
 import { RouterProvider } from "react-router-dom";
 import router from "./router/main.routes.jsx";
 import { store } from "./store/Store.jsx";
@@ -14,9 +15,17 @@ import { getOrders } from "./store/publicSlices/OrderSlice.jsx";
 import { getReturns } from "./store/publicSlices/ReturnSlice.jsx";
 import { getWishlist } from "./store/publicSlices/WishlistSlice.jsx";
 
+// get admin data...
+import { getCategories as AdminCategories } from './store/adminSlices/CategorySlice.jsx'
+import { getCoupons as AdminCoupons } from './store/adminSlices/CouponsSlice.jsx'
+import { getUsers as AdminUsers } from "./store/adminSlices/UsersSlice.jsx";
+import { getOrders as AdminOrders } from "./store/adminSlices/OrdersSlice.jsx";
+import { getReturns as AdminReturns } from "./store/adminSlices/ReturnsSlice.jsx";
+import { getProducts as AdminProducts } from "./store/adminSlices/ProductsSlice.jsx";
+
 function GlobalDataLoader({ children }) {
   const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state) => state.userSlice);
+  const { isLoggedIn, user } = useSelector((state) => state.userSlice);
 
   useEffect(() => {
     dispatch(getUser());
@@ -26,6 +35,15 @@ function GlobalDataLoader({ children }) {
       dispatch(getOrders());
       dispatch(getReturns());
       dispatch(getWishlist());
+    }
+
+    if (isLoggedIn && user?.role === "admin") {
+      dispatch(AdminCategories({ page: 1, limit: 20, search: "" }))
+      dispatch(AdminCoupons({page: 1, limit: 20, search: ""}))
+      dispatch(AdminOrders({ page: 1, limit: 20, search: "" }))
+      dispatch(AdminProducts({ page: 1, limit: 20, searchName: "" }))
+      dispatch(AdminReturns({page: 1, limit: 20, search: ""}))
+      dispatch(AdminUsers({ page: 1, limit: 20,search: "" }))
     }
   }, [dispatch, isLoggedIn]);
 

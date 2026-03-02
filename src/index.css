@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* Enable typography plugin */
+@plugin "@tailwindcss/typography";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @media (max-width: 420px) {

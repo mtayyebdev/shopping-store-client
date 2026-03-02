@@ -11,6 +11,8 @@ import DealsCard from "./cardsUI/DealsCard";
 import ProtectedRoute from "./secureRoutes/ProtectedRoute";
 import AdminRoute from "./secureRoutes/AdminRoute";
 import Spiner from "./loaders/Spiner";
+import Pagination from "./common/Pagination";
+import QuillEditor from "./text editor/QuillEditor";
 
 export {
   Header,
@@ -25,5 +27,7 @@ export {
   DealsCard,
   ProtectedRoute,
   AdminRoute,
-  Spiner
+  Spiner,
+  Pagination,
+  QuillEditor
 };

@@ -8,7 +8,9 @@ import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import Shipments from "./pages/Shipments";
 import Transactions from "./pages/Transactions";
-import ProfileDashboard from './pages/Profile'
+import Coupons from "./pages/Coupons";
+import ReturnsDashboard from "./pages/Returns";
+import Categories from "./pages/Categories";
 
 export {
   Root,
@@ -21,5 +23,7 @@ export {
   Settings,
   Shipments,
   Transactions,
-  ProfileDashboard
+  Coupons,
+  ReturnsDashboard,
+  Categories
 };

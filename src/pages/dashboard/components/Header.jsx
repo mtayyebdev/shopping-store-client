@@ -81,7 +81,7 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
   }
 
   return (
-    <header className="sticky top-0 z-99999 flex w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <header className="sticky top-0 z-40 flex w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div className="flex grow flex-col items-center justify-between md:flex-row md:px-6">
         {/* Top Section */}
         <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal md:border-b-0 md:px-0 md:py-4 dark:border-gray-800">
@@ -269,15 +269,6 @@ const Header = ({ sidebarToggle, setSidebarToggle }) => {
                 </div>
 
                 <ul className="flex flex-col gap-1 border-b border-gray-200 pt-4 pb-3 dark:border-gray-800">
-                  <li>
-                    <Link
-                      to="/web-admin/profile"
-                      className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 transition-all duration-200"
-                    >
-                      <AiOutlineUser className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                      Edit profile
-                    </Link>
-                  </li>
                   <li>
                     <Link
                       to="/web-admin/settings"

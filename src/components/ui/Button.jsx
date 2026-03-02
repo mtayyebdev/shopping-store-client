@@ -33,7 +33,7 @@ function Button({
       {link ? (
         <Link to={link} className={`cursor-pointer`}>
           <button
-            className={`cursor-pointer flex ${bgs[bg]} justify-center ${
+            className={`cursor-pointer flex ${bgs[bg]} items-center justify-center ${
               styles[style]
             } ${classes} ${rounded ? "rounded-full" : ""} ${sizes[size]}`}
             {...props}
