@@ -63,6 +63,7 @@ function Orders() {
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [eventChanged, seteventChanged] = useState(false);
+  const [filtersOpen, setfiltersOpen] = useState(false)
 
   const stats = [
     {
@@ -178,7 +179,7 @@ function Orders() {
     setSelectedOrder(null);
   };
 
-  const clearAllFilters=()=>{
+  const clearAllFilters = () => {
     setactionStatusFilter("all");
     setpaymentStatusFilter("all");
     setTimeFilter("all");
@@ -210,10 +211,10 @@ function Orders() {
       </div>
 
       <div className="bg-white p-5 rounded-2xl shadow-lg">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <h3 className="text-xl font-semibold">Orders Management</h3>
 
-          <div className="flex flex-col items-center sm:flex-row gap-3 w-full lg:w-auto">
+          <div className="flex items-center flex-row justify-between gap-3 w-full md:w-auto">
             <div className="relative w-full sm:w-72">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
               <input
@@ -229,8 +230,8 @@ function Orders() {
             </div>
 
             <div className="dropdown relative">
-              <FaFilter size={20} />
-              <div className="popup flex flex-col p-3 gap-3 absolute -right-2 top-11 bg-white shadow-md rounded-lg">
+              <FaFilter size={20} className="text-blue-500 hover:text-blue-600 cursor-pointer" onClick={() => setfiltersOpen(!filtersOpen)} />
+              {filtersOpen && <div className="popup flex flex-col p-3 gap-3 z-10 absolute -right-2 top-11 bg-white shadow-md rounded-lg">
                 <select
                   value={statusFilter}
                   onChange={(e) => {
@@ -291,8 +292,8 @@ function Orders() {
                   <option value="deleted">Deleted</option>
                 </select>
 
-                <button onClick={clearAllFilters}> Clear All Filters</button>
-              </div>
+                <button onClick={clearAllFilters} className="cursor-pointer text-sm text-btn2"> Clear All Filters</button>
+              </div>}
             </div>
           </div>
         </div>
@@ -340,7 +341,7 @@ function Orders() {
                     <td className="px-2 py-3">
                       <select
                         value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
+                        onChange={(e) => handleStatusChange(order?._id, e.target.value)}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border outline-none ${statusBadgeClass(order.orderStatus)}`}
                       >
                         {ORDER_STATUSES.map((status) => (
@@ -353,7 +354,7 @@ function Orders() {
                     <td className="px-2 py-3">
                       <select
                         value={order.actionStatus}
-                        onChange={(e) => handleActionStatusChange(order.orderId, e.target.value)}
+                        onChange={(e) => handleActionStatusChange(order?._id, e.target.value)}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border outline-none `}
                       >
                         <option value="active">Active</option>

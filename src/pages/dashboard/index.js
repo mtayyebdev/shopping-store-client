@@ -6,11 +6,10 @@ import Customers from "./pages/Customers";
 import Notifications from "./pages/Notifications";
 import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
-import Shipments from "./pages/Shipments";
-import Transactions from "./pages/Transactions";
 import Coupons from "./pages/Coupons";
 import ReturnsDashboard from "./pages/Returns";
 import Categories from "./pages/Categories";
+import DeliveryBoys from "./pages/DeliveryBoys";
 
 export {
   Root,
@@ -21,8 +20,7 @@ export {
   Orders,
   Products,
   Settings,
-  Shipments,
-  Transactions,
+  DeliveryBoys,
   Coupons,
   ReturnsDashboard,
   Categories

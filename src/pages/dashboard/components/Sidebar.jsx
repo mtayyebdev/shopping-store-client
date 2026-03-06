@@ -4,7 +4,7 @@ import {
     AiOutlineHome,
     AiOutlineDown,
 } from "react-icons/ai";
-import { LuCreditCard, LuGrid2X2, LuLogOut, LuSettings, LuShoppingCart, LuTruck, LuUsers } from 'react-icons/lu'
+import { LuGrid2X2, LuLogOut, LuSettings, LuShoppingCart, LuTruck, LuUsers } from 'react-icons/lu'
 import { TbTruckReturn } from "react-icons/tb";
 import { RiCoupon2Fill } from "react-icons/ri";
 import { useDispatch } from 'react-redux'
@@ -171,6 +171,12 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
                     />
 
                     <MenuItem
+                        icon={LuTruck}
+                        label="Delivery Boys"
+                        to="/web-admin/delivery-boys"
+                    />
+
+                    <MenuItem
                         icon={LuShoppingCart}
                         label="Orders"
                         to="/web-admin/orders"
@@ -186,18 +192,6 @@ const Sidebar = ({ sidebarToggle, setSidebarToggle }) => {
                         icon={TbTruckReturn}
                         label="Returns"
                         to="/web-admin/returns"
-                    />
-
-                    <MenuItem
-                        icon={LuTruck}
-                        label="Shipments"
-                        to="/web-admin/shipments"
-                    />
-
-                    <MenuItem
-                        icon={LuCreditCard}
-                        label="Transactions"
-                        to="/web-admin/transactions"
                     />
 
                     <MenuItem

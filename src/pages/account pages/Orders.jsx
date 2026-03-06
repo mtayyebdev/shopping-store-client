@@ -64,18 +64,21 @@ function Orders() {
     let count = 0;
     allOrders.forEach((order) => {
       let unReviewedOrder = order?.items.every((i) => i.isReviewed == false);
-      if (order.orderStatus==="delivered"&&unReviewedOrder) {
+      if (order.orderStatus === "delivered" && unReviewedOrder) {
         count += 1;
       }
     });
+
     settabs([
       { id: "all", label: "All", status: null },
       { id: "pending", label: "To Pay", status: "pending" },
       { id: "shipped", label: "To ship", status: "shipped" },
-      { id: "delivered", label: "To Receive", status: "delivered" },
-      { id: "review", label: "To Review", status: "review", count: count }
+      { id: "delivered", label: "To Receive", status: "delivered" || "" },
+      { id: "review", label: "To Review", status: "review", count: count },
+      { id: "refunded", label: "Returned & Refunded", status: "refunded" },
+      { id: "cancelled", label: "Cancelled", status: "cancelled" },
     ])
-  }, [ allOrders])
+  }, [allOrders])
 
   return (
     <div>
@@ -127,7 +130,7 @@ function Orders() {
           </div>
         ) : (
           filteredOrders.map((order) => (
-            <Link to={`/account/order/${order._id}`} key={order.orderId}>
+            <Link to={`/account/order/${order?.orderId}`} key={order.orderId}>
               <div className="p-4 bg-primary cursor-pointer my-3">
                 {/* Order Header */}
                 <div className="flex items-center justify-end mb-4">

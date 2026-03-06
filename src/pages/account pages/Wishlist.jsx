@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 function Wishlist() {
     const { setIsSidebarOpen } = useOutletContext();
     const { wishlist } = useSelector((state) => state.wishlistSlice)
-
     return (
         <div>
             <div className="flex items-center gap-3 mb-6">

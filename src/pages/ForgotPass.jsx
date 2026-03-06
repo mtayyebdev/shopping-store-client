@@ -57,8 +57,7 @@ export default function ForgotPassword() {
             <p className="text-secondary2 font-semibold mb-6">{email}</p>
 
             <p className="text-sm text-text1 mb-8">
-              Click the link in the email to reset your password. If you don't
-              see it, check your spam folder.
+              Click the link in the email to reset your password.
             </p>
 
             <Button

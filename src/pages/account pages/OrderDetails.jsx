@@ -13,7 +13,8 @@ function OrderDetails() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [orderData, setorderData] = useState(null)
+  const [orderData, setorderData] = useState(null);
+  const [orignalOrderId, setorignalOrderId] = useState(null);
   const [isLoading, setisLoading] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [showReviewModal, setShowReviewModal] = useState(false)
@@ -49,6 +50,7 @@ function OrderDetails() {
           .then((res) => {
             if (res.payload?.success) {
               setorderData(res.payload?.data);
+              setorignalOrderId(res.payload?.data?._id);
             }
           })
       }
@@ -59,7 +61,7 @@ function OrderDetails() {
   const handleCancelOrder = async () => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
       setIsCancelling(true)
-      const result = await dispatch(cancelOrder(orderId))
+      const result = await dispatch(cancelOrder(orignalOrderId))
       setIsCancelling(false)
       if (result.payload?.success) {
         toast.success('Order cancelled successfully');
@@ -74,7 +76,7 @@ function OrderDetails() {
   }
 
   const submitReturn = async () => {
-    if (!orderId || !orderItemData?.product || !orderItemData?._id) {
+    if (!orignalOrderId || !orderItemData?.product || !orderItemData?._id) {
       toast.error("Invalid order item data");
       return;
     }
@@ -84,7 +86,7 @@ function OrderDetails() {
     }
 
     const formData = new FormData();
-    formData.append("orderId", orderId);
+    formData.append("orderId", orignalOrderId);
     formData.append("productId", orderReturnData?.productId);
     formData.append("orderItemId", orderReturnData?.orderItemId);
     formData.append("quantity", orderReturnData.quantity);
@@ -116,7 +118,7 @@ function OrderDetails() {
       description: "",
       refundMethod: "wallet",
       refundAmount: 0,
-      productName:"",
+      productName: "",
       images: []
     })
 
@@ -174,7 +176,7 @@ function OrderDetails() {
       const formData = new FormData();
       formData.append("message", newReview.comment.trim());
       formData.append("rating", newReview.rating);
-      formData.append("orderId", orderId);
+      formData.append("orderId", orignalOrderId);
       newReview.images.forEach((i) => {
         formData.append("images", i)
       })
@@ -230,11 +232,15 @@ function OrderDetails() {
 
   const getStatusLabel = (status) => {
     const labels = {
-      pending: "To Pay",
+      pending: "Pending",
+      confirmed: "Confirmed",
       processing: "Processing",
       shipped: "Shipped",
+      out_of_delivery: "Out Of Delivery",
       delivered: "Delivered",
-      cancelled: "Cancelled"
+      cancelled: "Cancelled",
+      refunded: "Refunded",
+      returned: "Returned"
     }
     return labels[status] || status
   }
@@ -250,6 +256,12 @@ function OrderDetails() {
     return methods[paymentMethod] || paymentMethod;
   }
 
+  const orderStatuses = {
+    pending: ["pending"],
+    processing: ["confirmed", "processing"],
+    shipped: ["shipped", "out_for_delivery"],
+    delivered: ["delivered"]
+  }
   const orderTimeline = [
     { step: "Order Placed", status: "pending", icon: LuClock },
     { step: "Processing", status: "processing", icon: LuClock },
@@ -314,7 +326,8 @@ function OrderDetails() {
         <h3 className="text-lg font-bold text-text2 mb-6">Order Timeline</h3>
         <div className="flex items-center justify-between overflow-x-auto pb-4">
           {orderTimeline.map((item, index) => {
-            const isCompleted = orderTimeline.findIndex(t => t.status === orderData.orderStatus) >= index
+            const isCompleted = orderTimeline.findIndex(t => orderStatuses[t.status]?.includes(orderData?.orderStatus)) >= index;
+
             const IconComponent = item.icon
 
             return (
@@ -328,7 +341,7 @@ function OrderDetails() {
                     {item.step}
                   </p>
                 </div>
-                {index < orderTimeline.length - 1 && (
+                {index != orderTimeline.length - 1 && (
                   <div className={`h-1 w-8 md:w-12 mx-2 ${isCompleted ? 'bg-green-400' : 'bg-gray-300'}`}></div>
                 )}
               </div>
@@ -509,13 +522,14 @@ function OrderDetails() {
               {/* PENDING STATUS - Cancel & Payment */}
               {orderData.orderStatus === 'pending' && (
                 <>
-                  <button
-                    onClick={() => navigate(`/payment/${orderData._id}`)}
+                  {!orderData?.paymentMethod && <button
+                    onClick={() => navigate(`/payment/${orderData?.orderId}`)}
                     className="w-full flex items-center justify-center gap-2 bg-btn2 hover:bg-opacity-90 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition-colors duration-300"
                   >
                     <LuCreditCard size={18} />
                     Add Payment Method
-                  </button>
+                  </button>}
+
                   <button
                     onClick={handleCancelOrder}
                     disabled={isCancelling}
@@ -761,7 +775,7 @@ function OrderDetails() {
                     description: "",
                     refundMethod: "wallet",
                     refundAmount: 0,
-                    productName:"",
+                    productName: "",
                     images: []
                   });
                   setreturnImagePreviews([]);

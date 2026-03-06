@@ -38,12 +38,12 @@ function GlobalDataLoader({ children }) {
     }
 
     if (isLoggedIn && user?.role === "admin") {
-      dispatch(AdminCategories({ page: 1, limit: 20, search: "" }))
-      dispatch(AdminCoupons({page: 1, limit: 20, search: ""}))
-      dispatch(AdminOrders({ page: 1, limit: 20, search: "" }))
-      dispatch(AdminProducts({ page: 1, limit: 20, searchName: "" }))
-      dispatch(AdminReturns({page: 1, limit: 20, search: ""}))
-      dispatch(AdminUsers({ page: 1, limit: 20,search: "" }))
+      dispatch(AdminCategories({ page: 1, limit: 15, search: "" }))
+      dispatch(AdminCoupons({page: 1, limit: 15, search: ""}))
+      dispatch(AdminOrders({ page: 1, limit: 15, search: "" }))
+      dispatch(AdminProducts({ page: 1, limit: 15, searchName: "" }))
+      dispatch(AdminReturns({page: 1, limit: 15, search: ""}))
+      dispatch(AdminUsers({ page: 1, limit: 15,search: "" }))
     }
   }, [dispatch, isLoggedIn]);
 

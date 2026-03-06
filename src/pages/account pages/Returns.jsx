@@ -24,15 +24,15 @@ function Returns() {
                     >
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                             <div>
-                                <p className="text-sm text-gray-600">Return ID: <span className="font-semibold text-gray-900 uppercase">{returnItem._id}</span></p>
-                                <p className="text-sm text-gray-600">Order ID: <span className="font-semibold text-gray-900 uppercase">{returnItem.orderId}</span></p>
+                                <p className="text-sm text-gray-600">Return ID: <span className="font-semibold text-gray-900 uppercase">{returnItem?.returnId}</span></p>
+                                <p className="text-sm text-gray-600">Order ID: <span className="font-semibold text-gray-900 uppercase">{returnItem?.orderInfo?.orderId}</span></p>
                                 <p className="text-sm text-gray-600">Initiated on: {new Date(returnItem.createdAt).toLocaleDateString()}</p>
                             </div>
                             <span className={`px-3 py-1 rounded-full text-sm font-semibold ${returnItem.status === 'completed' ? 'bg-green-100 text-green-700' :
                                 returnItem.status === 'requested' ? 'bg-yellow-100 text-yellow-700' :
-                                    'bg-red-100 text-red-700'
+                                    'bg-red-100 text-gray-700'
                                 }`}>
-                                {returnItem.status}
+                                {returnItem.status?.toUpperCase()}
                             </span>
                         </div>
                         <div className="border-t pt-4">

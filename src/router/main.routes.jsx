@@ -19,7 +19,7 @@ import {
   Shop,
   OrderDetails
 } from "../pages/index.js";
-import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, Shipments, Transactions, Coupons, ReturnsDashboard,Categories } from '../pages/dashboard/index.js'
+import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, DeliveryBoys, Coupons, ReturnsDashboard,Categories } from '../pages/dashboard/index.js'
 import { ProtectedRoute, AdminRoute } from "../components/index.js";
 
 const router = createBrowserRouter([
@@ -120,8 +120,8 @@ const router = createBrowserRouter([
         path: "orders"
       },
       {
-        element: <Shipments />,
-        path: "shipments"
+        element: <DeliveryBoys />,
+        path: "delivery-boys"
       },
       {
         element: <Customers />,
@@ -134,10 +134,6 @@ const router = createBrowserRouter([
       {
         element: <Settings />,
         path: "settings"
-      },
-      {
-        element: <Transactions />,
-        path: "transactions"
       },
       {
         element: <Coupons />,
