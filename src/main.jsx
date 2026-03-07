@@ -7,6 +7,7 @@ import router from "./router/main.routes.jsx";
 import { store } from "./store/Store.jsx";
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
+import { socket } from "./socket.js";
 
 // get data....
 import { getUser } from "./store/publicSlices/UserSlice.jsx";
@@ -28,6 +29,18 @@ function GlobalDataLoader({ children }) {
   const { isLoggedIn, user } = useSelector((state) => state.userSlice);
 
   useEffect(() => {
+    const data = {
+      name: "Tayyeb",
+      age: 17
+    }
+    socket.emit("newOrder", data)
+
+    return () => {
+      socket.disconnect();
+    }
+  }, [])
+
+  useEffect(() => {
     dispatch(getUser());
 
     if (isLoggedIn) {
@@ -39,11 +52,11 @@ function GlobalDataLoader({ children }) {
 
     if (isLoggedIn && user?.role === "admin") {
       dispatch(AdminCategories({ page: 1, limit: 15, search: "" }))
-      dispatch(AdminCoupons({page: 1, limit: 15, search: ""}))
+      dispatch(AdminCoupons({ page: 1, limit: 15, search: "" }))
       dispatch(AdminOrders({ page: 1, limit: 15, search: "" }))
       dispatch(AdminProducts({ page: 1, limit: 15, searchName: "" }))
-      dispatch(AdminReturns({page: 1, limit: 15, search: ""}))
-      dispatch(AdminUsers({ page: 1, limit: 15,search: "" }))
+      dispatch(AdminReturns({ page: 1, limit: 15, search: "" }))
+      dispatch(AdminUsers({ page: 1, limit: 15, search: "" }))
     }
   }, [dispatch, isLoggedIn]);
 
