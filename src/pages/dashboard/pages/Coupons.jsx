@@ -34,7 +34,7 @@ function Coupons() {
 
     const [search, setSearch] = useState("");
     const [page, setpage] = useState(1);
-    const [limit, setlimit] = useState(20);
+    const [limit, setlimit] = useState(15);
     const [statusFilter, setStatusFilter] = useState("all");
     const [discountTypeFilter, setDiscountTypeFilter] = useState("all");
     const [timeFilter, setTimeFilter] = useState("all");

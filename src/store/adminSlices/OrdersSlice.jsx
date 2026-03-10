@@ -47,6 +47,24 @@ export const updateOrderActionStatus = createAsyncThunk("updateorderactionstatus
     }
 });
 
+export const getRiders = createAsyncThunk("getriders", async (search, { rejectWithValue }) => {
+    try {
+        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/order/admin/get-riders?search=${search}`, { withCredentials: true });
+        return res.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message)
+    }
+});
+
+export const assignOrderToRider = createAsyncThunk("assignordertorider", async ({ orderId, riderId }, { rejectWithValue }) => {
+    try {
+        const res = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/api/order/admin/assign-order/${orderId}`, { deliveryBoyId:riderId }, { withCredentials: true });
+        return res.data
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error?.message)
+    }
+})
+
 
 const OrderSlice = createSlice({
     name: "orderslice",

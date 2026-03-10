@@ -13,6 +13,7 @@ import AdminRoute from "./secureRoutes/AdminRoute";
 import Spiner from "./loaders/Spiner";
 import Pagination from "./common/Pagination";
 import QuillEditor from "./text editor/QuillEditor";
+import RiderRoute from "./secureRoutes/RiderRoute";
 
 export {
   Header,
@@ -29,5 +30,6 @@ export {
   AdminRoute,
   Spiner,
   Pagination,
-  QuillEditor
+  QuillEditor,
+  RiderRoute
 };

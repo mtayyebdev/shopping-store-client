@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaBan,
   FaBicycle,
@@ -14,7 +14,10 @@ import {
   FaTrash,
   FaUsers,
 } from "react-icons/fa";
-import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { createRider, deleteRider, getRider, getRiders, updateRider, updateRiderActionStatus } from '../../../store/adminSlices/DeliveryBoySlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { Pagination } from '../../../components/index'
+import { toast } from "react-toastify";
 
 const VEHICLE_TYPES = ["bike", "car", "cycle"];
 const ACTION_STATUSES = ["active", "suspended", "deleted"];
@@ -34,72 +37,19 @@ const vehicleIcon = (vehicleType) => {
   return FaBicycle;
 };
 
-const daysAgo = (days) => {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  return d;
-};
-
-const createMockDeliveryBoys = () => {
-  const names = [
-    "Ali Raza",
-    "Usman Tariq",
-    "Bilal Ahmed",
-    "Kamran Shah",
-    "Sajid Khan",
-    "Waqar Malik",
-    "Hamza Noor",
-    "Fahad Iqbal",
-  ];
-  const cities = ["Lahore", "Karachi", "Islamabad", "Rawalpindi", "Faisalabad"];
-  const states = ["Punjab", "Sindh", "ICT", "Punjab", "Punjab"];
-
-  return Array.from({ length: 30 }, (_, i) => {
-    const vehicleType = VEHICLE_TYPES[i % VEHICLE_TYPES.length];
-    const actionStatus = ACTION_STATUSES[i % ACTION_STATUSES.length];
-    const city = cities[i % cities.length];
-
-    return {
-      _id: `66ffde2ca2b1e30018d9${9000 + i}`,
-      name: `${names[i % names.length]} ${i + 1}`,
-      phone: `03${(i % 9) + 1}45678${String(i).padStart(2, "0")}`,
-      email: `rider${i + 1}@delivery.com`,
-      password: "******",
-      vehicleType,
-      vehicleNumber:
-        vehicleType === "bike"
-          ? `LEB-${500 + i}`
-          : vehicleType === "car"
-            ? `LXR-${300 + i}`
-            : `CYC-${100 + i}`,
-      currentOrders: i % 6,
-      location: {
-        lat: Number((31.4 + i * 0.01).toFixed(4)),
-        lng: Number((74.2 + i * 0.01).toFixed(4)),
-        updatedAt: daysAgo(i % 5).toISOString(),
-      },
-      address: {
-        country: "Pakistan",
-        city,
-        state: states[i % states.length],
-        postalCode: `${54000 + i}`,
-        fullAddress: `${20 + i} Main Street, ${city}`,
-      },
-      actionStatus,
-      createdAt: daysAgo(i + 2).toISOString(),
-      updatedAt: daysAgo(i).toISOString(),
-    };
-  });
-};
 
 function DeliveryBoys() {
-  const [deliveryBoys, setDeliveryBoys] = useState(createMockDeliveryBoys);
+  const { riders, totalPages, totalDeliveryBoys, totalRiders, activeRiders, busyRiders, suspendedRiders } = useSelector((state) => state.deliveryBoyAdminSlice);
+  const dispatch = useDispatch();
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [vehicleFilter, setVehicleFilter] = useState("all");
   const [workloadFilter, setWorkloadFilter] = useState("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setpage] = useState(1);
+  const [limit, setlimit] = useState(15);
+  const [eventChanged, seteventChanged] = useState(false);
 
   const [createModal, setCreateModal] = useState(false);
   const [viewModal, setViewModal] = useState(false);
@@ -114,10 +64,9 @@ function DeliveryBoys() {
     password: "",
     vehicleType: "bike",
     vehicleNumber: "",
-    currentOrders: "0",
-    actionStatus: "active",
     city: "",
     state: "",
+    country: "",
     postalCode: "",
     fullAddress: "",
   });
@@ -129,60 +78,12 @@ function DeliveryBoys() {
     password: "",
     vehicleType: "bike",
     vehicleNumber: "",
-    currentOrders: "0",
-    actionStatus: "active",
     city: "",
     state: "",
+    country: "",
     postalCode: "",
     fullAddress: "",
   });
-
-  const rowsPerPage = 8;
-
-  const filteredRiders = useMemo(() => {
-    let data = [...deliveryBoys];
-    const q = search.trim().toLowerCase();
-
-    if (q) {
-      data = data.filter((rider) => {
-        const text = [
-          rider.name,
-          rider.phone,
-          rider.email,
-          rider.vehicleNumber,
-          rider.address.city,
-          rider._id,
-        ]
-          .join(" ")
-          .toLowerCase();
-        return text.includes(q);
-      });
-    }
-
-    if (statusFilter !== "all") {
-      data = data.filter((rider) => rider.actionStatus === statusFilter);
-    }
-
-    if (vehicleFilter !== "all") {
-      data = data.filter((rider) => rider.vehicleType === vehicleFilter);
-    }
-
-    if (workloadFilter !== "all") {
-      if (workloadFilter === "idle") data = data.filter((rider) => rider.currentOrders === 0);
-      if (workloadFilter === "normal") data = data.filter((rider) => rider.currentOrders > 0 && rider.currentOrders <= 3);
-      if (workloadFilter === "busy") data = data.filter((rider) => rider.currentOrders > 3);
-    }
-
-    return data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [deliveryBoys, search, statusFilter, vehicleFilter, workloadFilter]);
-
-  const totalPages = Math.ceil(filteredRiders.length / rowsPerPage);
-  const pageData = filteredRiders.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-
-  const totalRiders = deliveryBoys.length;
-  const activeRiders = deliveryBoys.filter((r) => r.actionStatus === "active").length;
-  const suspendedRiders = deliveryBoys.filter((r) => r.actionStatus === "suspended").length;
-  const busyRiders = deliveryBoys.filter((r) => r.currentOrders > 3).length;
 
   const stats = [
     {
@@ -219,36 +120,63 @@ function DeliveryBoys() {
     },
   ];
 
-  const handleStatusChange = (id, status) => {
-    setDeliveryBoys((prev) =>
-      prev.map((rider) =>
-        rider._id === id ? { ...rider, actionStatus: status, updatedAt: new Date().toISOString() } : rider
-      )
-    );
+  const handleStatusChange = async (id, status) => {
+    await dispatch(updateRiderActionStatus({ riderId: id, actionStatus: status }))
+      .then((res) => {
+        if (res.type === "updaterideractionstatus/fulfilled") {
+          toast.success(res.payload?.message);
+          seteventChanged((prev) => !prev);
+        } else {
+          toast.error(res.payload?.message);
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while updating Rider status.");
+      })
   };
 
-  const openView = (rider) => {
-    setSelectedRider(rider);
-    setViewModal(true);
+  const openView = async (riderId) => {
+    await dispatch(getRider(riderId))
+      .then((res) => {
+        if (res.type === "getrider/fulfilled") {
+          setSelectedRider(res.payload?.data);
+          setViewModal(true);
+        } else {
+          toast.error(res.payload?.message);
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while getting Rider data.");
+      })
   };
 
-  const openEdit = (rider) => {
-    setSelectedRider(rider);
-    setEditForm({
-      name: rider.name,
-      phone: rider.phone,
-      email: rider.email,
-      password: rider.password || "",
-      vehicleType: rider.vehicleType,
-      vehicleNumber: rider.vehicleNumber,
-      currentOrders: String(rider.currentOrders),
-      actionStatus: rider.actionStatus,
-      city: rider.address.city,
-      state: rider.address.state,
-      postalCode: rider.address.postalCode,
-      fullAddress: rider.address.fullAddress,
-    });
-    setEditModal(true);
+  const openEdit = async (riderId) => {
+    setSelectedRider(riderId);
+    await dispatch(getRider(riderId))
+      .then((res) => {
+        if (res.type === "getrider/fulfilled") {
+          const rider = res.payload?.data;
+          setEditForm({
+            name: rider?.name || "",
+            phone: rider?.phone || "",
+            email: rider?.email || "",
+            password: "",
+            vehicleType: rider?.vehicleType || "",
+            vehicleNumber: rider?.vehicleNumber || "",
+            city: rider?.address?.city || "",
+            country: rider?.address?.country || "",
+            state: rider?.address?.state || "",
+            postalCode: rider?.address?.postalCode || "",
+            fullAddress: rider?.address?.fullAddress || "",
+          });
+          setEditModal(true);
+        } else {
+          toast.error(res.payload?.message);
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while getting Rider data.");
+      })
   };
 
   const openDelete = (rider) => {
@@ -274,95 +202,86 @@ function DeliveryBoys() {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCreateRider = () => {
+  const handleCreateRider = async () => {
     if (!createForm.name.trim() || !createForm.phone.trim()) return;
 
-    const newRider = {
-      _id: `66ffde2ca2b1e30018d9${Math.floor(10000 + Math.random() * 9999)}`,
-      name: createForm.name.trim(),
-      phone: createForm.phone.trim(),
-      email: createForm.email.trim(),
-      password: createForm.password || "******",
-      vehicleType: createForm.vehicleType,
-      vehicleNumber: createForm.vehicleNumber.trim(),
-      currentOrders: Number(createForm.currentOrders || 0),
-      location: {
-        lat: 31.5204,
-        lng: 74.3587,
-        updatedAt: new Date().toISOString(),
-      },
-      address: {
-        country: "Pakistan",
-        city: createForm.city.trim() || "-",
-        state: createForm.state.trim() || "-",
-        postalCode: createForm.postalCode.trim() || "-",
-        fullAddress: createForm.fullAddress.trim() || "-",
-      },
-      actionStatus: createForm.actionStatus,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setDeliveryBoys((prev) => [newRider, ...prev]);
-    setCreateModal(false);
-    setCreateForm({
-      name: "",
-      phone: "",
-      email: "",
-      password: "",
-      vehicleType: "bike",
-      vehicleNumber: "",
-      currentOrders: "0",
-      actionStatus: "active",
-      city: "",
-      state: "",
-      postalCode: "",
-      fullAddress: "",
-    });
+    await dispatch(createRider(createForm))
+      .then((res) => {
+        if (res.type === "createrider/fulfilled") {
+          toast.success(res.payload?.message);
+          seteventChanged((prev) => !prev)
+          setCreateModal(false);
+          setCreateForm({
+            name: "",
+            phone: "",
+            email: "",
+            password: "",
+            vehicleType: "bike",
+            vehicleNumber: "",
+            country: "",
+            city: "",
+            state: "",
+            postalCode: "",
+            fullAddress: "",
+          });
+        } else {
+          toast.error(res.payload?.message);
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while creating new Rider.");
+      })
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!selectedRider) return;
 
-    setDeliveryBoys((prev) =>
-      prev.map((rider) =>
-        rider._id === selectedRider._id
-          ? {
-              ...rider,
-              name: editForm.name,
-              phone: editForm.phone,
-              email: editForm.email,
-              password: editForm.password || rider.password,
-              vehicleType: editForm.vehicleType,
-              vehicleNumber: editForm.vehicleNumber,
-              currentOrders: Number(editForm.currentOrders || 0),
-              actionStatus: editForm.actionStatus,
-              address: {
-                ...rider.address,
-                city: editForm.city,
-                state: editForm.state,
-                postalCode: editForm.postalCode,
-                fullAddress: editForm.fullAddress,
-              },
-              updatedAt: new Date().toISOString(),
-            }
-          : rider
-      )
-    );
-
-    setEditModal(false);
-    setSelectedRider(null);
+    await dispatch(updateRider({ riderId: selectedRider, riderData: editForm }))
+      .then((res) => {
+        if (res.type === "updaterider/fulfilled") {
+          toast.success(res.payload?.message);
+          seteventChanged((prev) => !prev)
+          setEditModal(false);
+          setSelectedRider(null);
+          setEditForm({
+            name: "",
+            phone: "",
+            email: "",
+            password: "",
+            vehicleType: "",
+            vehicleNumber: "",
+            country: "",
+            city: "",
+            state: "",
+            postalCode: "",
+            fullAddress: "",
+          });
+        } else {
+          toast.error(res.payload?.message);
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while updating Rider data.");
+      })
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedRider) return;
-    setDeliveryBoys((prev) => prev.filter((rider) => rider._id !== selectedRider._id));
-    closeModals();
-  };
+    await dispatch(deleteRider(selectedRider?._id))
+      .then((res) => {
+        if (res.type === "deleterider/fulfilled") {
+          toast.success(res.payload?.message);
+          seteventChanged((prev) => !prev)
+          setSelectedRider(null);
+          closeModals();
+        } else {
+          toast.error(res.payload?.message);
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while updating Rider data.");
+      })
 
-  const setPage = (page) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
   };
 
   const clearAllFilters = () => {
@@ -370,6 +289,10 @@ function DeliveryBoys() {
     setVehicleFilter("all");
     setWorkloadFilter("all");
   };
+
+  useEffect(() => {
+    dispatch(getRiders({ page, limit, search, actionStatus: statusFilter, vehicleType: vehicleFilter, workload: workloadFilter }));
+  }, [page, limit, search, statusFilter, vehicleFilter, workloadFilter, eventChanged])
 
   return (
     <>
@@ -409,7 +332,7 @@ function DeliveryBoys() {
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  setCurrentPage(1);
+                  setpage(1);
                 }}
                 placeholder="Search rider..."
                 className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -429,7 +352,7 @@ function DeliveryBoys() {
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
-                    setCurrentPage(1);
+                    setpage(1);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
                 >
@@ -443,7 +366,7 @@ function DeliveryBoys() {
                   value={vehicleFilter}
                   onChange={(e) => {
                     setVehicleFilter(e.target.value);
-                    setCurrentPage(1);
+                    setpage(1);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
                 >
@@ -457,7 +380,7 @@ function DeliveryBoys() {
                   value={workloadFilter}
                   onChange={(e) => {
                     setWorkloadFilter(e.target.value);
-                    setCurrentPage(1);
+                    setpage(1);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
                 >
@@ -486,44 +409,44 @@ function DeliveryBoys() {
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Rider</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Contact</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Vehicle</th>
-                <th className="text-left px-2 py-3 font-semibold text-gray-700">Current Orders</th>
+                <th className="text-left px-2 py-3 whitespace-nowrap font-semibold text-gray-700">Current Orders</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Location</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Status</th>
                 <th className="text-center px-2 py-3 font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {pageData.length === 0 ? (
+              {riders?.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-8 text-gray-500">No delivery boys found.</td>
                 </tr>
               ) : (
-                pageData.map((rider) => {
-                  const VehicleIcon = vehicleIcon(rider.vehicleType);
+                riders?.map((rider) => {
+                  const VehicleIcon = vehicleIcon(rider?.vehicleType);
                   return (
-                    <tr key={rider._id} className="border-b border-gray-200">
+                    <tr key={rider?._id} className="border-b border-gray-200">
                       <td className="px-2 py-3">
-                        <p className="font-semibold text-gray-800">{rider.name}</p>
+                        <p className="font-semibold text-gray-800">{rider?.name}</p>
                       </td>
                       <td className="px-2 py-3 text-sm text-gray-700">
-                        <p>{rider.phone}</p>
-                        <p className="text-xs text-gray-500">{rider.email}</p>
+                        <p>{rider?.phone}</p>
+                        <p className="text-xs text-gray-500">{rider?.email}</p>
                       </td>
                       <td className="px-2 py-3">
                         <div className="inline-flex items-center gap-2 text-sm text-gray-700">
                           <VehicleIcon size={14} />
-                          {formatLabel(rider.vehicleType)} ({rider.vehicleNumber})
+                          {formatLabel(rider?.vehicleType)} ({rider?.vehicleNumber})
                         </div>
                       </td>
-                      <td className="px-2 py-3 text-sm text-gray-700">{rider.currentOrders}</td>
+                      <td className="px-2 py-3 text-sm text-gray-700">{rider?.currentOrders}</td>
                       <td className="px-2 py-3 text-sm text-gray-700">
-                        {rider.address.city}
+                        {rider?.address?.city}
                       </td>
                       <td className="px-2 py-3">
                         <select
-                          value={rider.actionStatus}
-                          onChange={(e) => handleStatusChange(rider._id, e.target.value)}
-                          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border outline-none ${statusClass(rider.actionStatus)}`}
+                          value={rider?.actionStatus}
+                          onChange={(e) => handleStatusChange(rider?._id, e.target.value)}
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border outline-none ${statusClass(rider?.actionStatus)}`}
                         >
                           {ACTION_STATUSES.map((status) => (
                             <option key={status} value={status}>{formatLabel(status)}</option>
@@ -532,10 +455,10 @@ function DeliveryBoys() {
                       </td>
                       <td className="px-2 py-3">
                         <div className="flex justify-center gap-2">
-                          <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" onClick={() => openView(rider)}>
+                          <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" onClick={() => openView(rider?._id)}>
                             <FaEye size={15} />
                           </button>
-                          <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" onClick={() => openEdit(rider)}>
+                          <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" onClick={() => openEdit(rider?._id)}>
                             <FaEdit size={15} />
                           </button>
                           <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" onClick={() => openDelete(rider)}>
@@ -551,46 +474,7 @@ function DeliveryBoys() {
           </table>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-8 gap-4">
-          <p className="text-sm text-gray-500">
-            Showing <span className="font-semibold text-gray-900">{pageData.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}</span>
-            {" "}to <span className="font-semibold text-gray-900">{Math.min(currentPage * rowsPerPage, filteredRiders.length)}</span>
-            {" "}of <span className="font-semibold text-gray-900">{filteredRiders.length}</span> riders
-          </p>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <MdOutlineKeyboardArrowLeft className="inline" size={18} /> Prev
-            </button>
-
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              const page = i + 1;
-              return (
-                <button
-                  key={page}
-                  onClick={() => setPage(page)}
-                  className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold ${
-                    currentPage === page ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => setPage(currentPage + 1)}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next <MdOutlineKeyboardArrowRight className="inline" size={18} />
-            </button>
-          </div>
-        </div>
+        <Pagination NumberOfItems={totalDeliveryBoys} limit={limit} page={page} setpage={setpage} title={"Delivery Boys"} totalPages={totalPages} />
       </div>
 
       {createModal && (
@@ -634,16 +518,8 @@ function DeliveryBoys() {
                   <input type="text" name="vehicleNumber" value={createForm.vehicleNumber} onChange={handleCreateChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Current Orders</label>
-                  <input type="number" name="currentOrders" value={createForm.currentOrders} onChange={handleCreateChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Action Status</label>
-                  <select name="actionStatus" value={createForm.actionStatus} onChange={handleCreateChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    {ACTION_STATUSES.map((status) => (
-                      <option key={status} value={status}>{formatLabel(status)}</option>
-                    ))}
-                  </select>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</label>
+                  <input type="text" name="country" value={createForm.country} onChange={handleCreateChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1.5 block">City</label>
@@ -686,51 +562,50 @@ function DeliveryBoys() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Name</p>
-                  <p className="font-semibold text-gray-800">{selectedRider.name}</p>
+                  <p className="font-semibold text-gray-800">{selectedRider?.name}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Phone</p>
-                  <p className="font-semibold text-gray-800">{selectedRider.phone}</p>
+                  <p className="font-semibold text-gray-800">{selectedRider?.phone}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Email</p>
-                  <p className="font-semibold text-gray-800">{selectedRider.email || "-"}</p>
+                  <p className="font-semibold text-gray-800 text-sm">{selectedRider?.email || "-"}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Status</p>
-                  <p className="font-semibold text-gray-800">{formatLabel(selectedRider.actionStatus)}</p>
+                  <p className="font-semibold text-gray-800">{formatLabel(selectedRider?.actionStatus)}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                   <h4 className="font-semibold text-gray-700 mb-3">Vehicle & Orders</h4>
-                  <p className="text-sm text-gray-700">Vehicle: {formatLabel(selectedRider.vehicleType)}</p>
-                  <p className="text-sm text-gray-700">Vehicle Number: {selectedRider.vehicleNumber}</p>
-                  <p className="text-sm text-gray-700">Current Orders: {selectedRider.currentOrders}</p>
-                  <p className="text-sm text-gray-700">Password: {selectedRider.password}</p>
+                  <p className="text-sm text-gray-700">Vehicle: {formatLabel(selectedRider?.vehicleType)}</p>
+                  <p className="text-sm text-gray-700">Vehicle Number: {selectedRider?.vehicleNumber}</p>
+                  <p className="text-sm text-gray-700">Current Orders: {selectedRider?.currentOrders}</p>
                 </div>
 
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                   <h4 className="font-semibold text-gray-700 mb-3">Address</h4>
-                  <p className="text-sm text-gray-700">{selectedRider.address.fullAddress}</p>
-                  <p className="text-sm text-gray-700">{selectedRider.address.city}, {selectedRider.address.state}</p>
-                  <p className="text-sm text-gray-700">{selectedRider.address.country} - {selectedRider.address.postalCode}</p>
+                  <p className="text-sm text-gray-700">{selectedRider?.address?.fullAddress}</p>
+                  <p className="text-sm text-gray-700">{selectedRider?.address?.city}, {selectedRider?.address?.state}</p>
+                  <p className="text-sm text-gray-700">{selectedRider?.address?.country} - {selectedRider?.address?.postalCode}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Latitude</p>
-                  <p className="font-semibold text-gray-800">{selectedRider.location.lat}</p>
+                  <p className="font-semibold text-gray-800">{selectedRider?.location?.lat}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Longitude</p>
-                  <p className="font-semibold text-gray-800">{selectedRider.location.lng}</p>
+                  <p className="font-semibold text-gray-800">{selectedRider?.location?.lng}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500">Location Updated</p>
-                  <p className="font-semibold text-gray-800 text-sm">{formatDate(selectedRider.location.updatedAt)}</p>
+                  <p className="font-semibold text-gray-800 text-sm">{formatDate(selectedRider?.location?.updatedAt)}</p>
                 </div>
               </div>
             </div>
@@ -782,19 +657,9 @@ function DeliveryBoys() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Current Orders</label>
-                  <input type="number" name="currentOrders" value={editForm.currentOrders} onChange={handleEditChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" />
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</label>
+                  <input type="text" name="country" value={editForm.country} onChange={handleEditChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Action Status</label>
-                  <select name="actionStatus" value={editForm.actionStatus} onChange={handleEditChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    {ACTION_STATUSES.map((status) => (
-                      <option key={status} value={status}>{formatLabel(status)}</option>
-                    ))}
-                  </select>
-                </div>
-
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1.5 block">City</label>
                   <input type="text" name="city" value={editForm.city} onChange={handleEditChange} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" />

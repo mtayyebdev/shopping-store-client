@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import { Pagination } from '../../../components/index'
 import { useDispatch, useSelector } from "react-redux";
-import { deleteOrder, getOrder, getOrders, updateOrderStatus, updateOrderActionStatus } from '../../../store/adminSlices/OrdersSlice';
+import { deleteOrder, getOrder, getOrders, updateOrderStatus, updateOrderActionStatus, getRiders, assignOrderToRider } from '../../../store/adminSlices/OrdersSlice';
 import { toast } from "react-toastify";
 
 const ORDER_STATUSES = [
@@ -58,12 +58,15 @@ function Orders() {
   const [paymentStatusFilter, setpaymentStatusFilter] = useState("all");
   const [actionStatusFilter, setactionStatusFilter] = useState("all");
   const [page, setpage] = useState(1);
-  const [limit, setlimit] = useState(10);
+  const [limit, setlimit] = useState(15);
   const [viewModal, setViewModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [eventChanged, seteventChanged] = useState(false);
   const [filtersOpen, setfiltersOpen] = useState(false)
+  const [riderModel, setriderModel] = useState(false);
+  const [searchRider, setsearchRider] = useState("");
+  const [activeRiders, setactiveRiders] = useState([]);
 
   const stats = [
     {
@@ -173,6 +176,30 @@ function Orders() {
       })
   };
 
+  const handleAssignOrderClick = (orderId) => {
+    setSelectedOrder(orderId);
+    setriderModel(true)
+  }
+
+  const assignRiderHandler = async (riderId) => {
+    if (!riderId || !selectedOrder) return null;
+
+    await dispatch(assignOrderToRider({ orderId: selectedOrder, riderId }))
+      .then((res) => {
+        if (res.type === "assignordertorider/fulfilled") {
+          toast.success(res.payload?.message);
+          setriderModel(false);
+          setSelectedOrder(null);
+          seteventChanged(prev => !prev)
+        } else {
+          toast.error(res.payload?.message)
+        }
+      }).catch((err) => {
+        console.log("Something went wrong while assigning order.");
+
+      })
+  }
+
   const handleCloseModals = () => {
     setViewModal(false);
     setDeleteModal(false);
@@ -191,6 +218,23 @@ function Orders() {
   useEffect(() => {
     dispatch(getOrders({ page, limit, search, status: statusFilter, time: timeFilter, paymentStatus: paymentStatusFilter, actionStatus: actionStatusFilter }));
   }, [page, limit, search, statusFilter, timeFilter, eventChanged, actionStatusFilter, paymentStatusFilter, dispatch]);
+
+  const getActiveRiders = async (search) => {
+    await dispatch(getRiders(search))
+      .then((res) => {
+        if (res.type === "getriders/fulfilled") {
+          setactiveRiders(res.payload?.data)
+        }
+      })
+      .catch((err) => {
+        console.log("Something went wrong while getting riders.");
+
+      })
+  }
+
+  useEffect(() => {
+    getActiveRiders(searchRider)
+  }, [searchRider])
 
   return (
     <>
@@ -307,6 +351,7 @@ function Orders() {
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Items</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Payment</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Total</th>
+                <th className="text-left px-2 py-3 font-semibold text-gray-700">Rider</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Status</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Action Status</th>
                 <th className="text-left px-2 py-3 font-semibold text-gray-700">Created</th>
@@ -338,6 +383,11 @@ function Orders() {
                       </span>
                     </td>
                     <td className="px-2 py-3 font-semibold text-gray-800">{currency?.symbol}{order.totalPrice.toFixed(2)}</td>
+                    <td className="px-2 py-1">
+                      {order?.deliveryBoy ? "Assigned" :
+                        <button className="whitespace-nowrap cursor-pointer bg-blue-500 px-2 py-1 rounded text-white" onClick={() => handleAssignOrderClick(order?._id)}>Assign Rider</button>
+                      }
+                    </td>
                     <td className="px-2 py-3">
                       <select
                         value={order.orderStatus}
@@ -513,6 +563,63 @@ function Orders() {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {riderModel && selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b p-5 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-2xl font-bold text-gray-800">Assign Rider</h2>
+              <button onClick={handleCloseModals} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <FaTimes size={20} className="text-gray-600" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="search py-1 px-2 rounded-md w-full overflow-hidden border-blue-400 border">
+                <input type="text" placeholder="Search rider Name, Phone, Email" className="outline-none w-full py-1" value={searchRider} onChange={(e) => setsearchRider(e.target.value)} />
+              </div>
+              <div className="overflow-x-auto block overflow-hidden">
+                <table className="w-full min-w-220">
+                  <thead>
+                    <tr className="border-b border-gray-300">
+                      <th className="text-left px-2 py-3 font-semibold text-gray-700">Name</th>
+                      <th className="text-left px-2 py-3 font-semibold text-gray-700">Phone</th>
+                      <th className="text-left px-2 py-3 font-semibold text-gray-700">Active Orders</th>
+                      <th className="text-left px-2 py-3 font-semibold text-gray-700">Vehicle Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeRiders?.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="text-center py-8 text-gray-500">
+                          No riders found.
+                        </td>
+                      </tr>
+                    ) : (
+                      activeRiders?.map((rider, i) => (
+                        <tr key={i} className="border-b border-gray-200 hover:bg-blue-300 cursor-pointer" onClick={() => assignRiderHandler(rider?._id)}>
+                          <td className="px-2 py-3">
+                            <p className="font-medium text-gray-800">{rider?.name}</p>
+                          </td>
+                          <td className="px-2 py-3">
+                            <p className="font-medium text-gray-800">{rider?.phone}</p>
+                          </td>
+                          <td className="px-2 py-3">
+                            <p className="font-medium text-gray-800">{rider?.currentOrders}</p>
+                          </td>
+                          <td className="px-2 py-3">
+                            <p className="font-medium text-gray-800">{rider?.vehicleType}</p>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

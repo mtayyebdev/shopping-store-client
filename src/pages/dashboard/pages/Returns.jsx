@@ -303,10 +303,10 @@ function Returns() {
                 returnsData?.map((item, i) => (
                   <tr key={i} className="border-b border-gray-200">
                     <td className="px-2 py-3">
-                      <p className="font-semibold text-gray-800">{item?.returnId}</p>
+                      <p className="font-semibold text-gray-800 text-nowrap">{item?.returnId}</p>
                     </td>
                     <td className="px-2 py-3">
-                      <p className="text-gray-700">{item?.orders_info?.orderId}</p>
+                      <p className="text-gray-700 whitespace-nowrap">{item?.orders_info?.orderId}</p>
                       <p className="text-xs text-gray-500">Qty: {item?.quantity}</p>
                     </td>
                     <td className="px-2 py-3">

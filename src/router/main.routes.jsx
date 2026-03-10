@@ -1,5 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
+
+// public customer pages...........
 import {
   Home,
   SignIn,
@@ -19,8 +21,15 @@ import {
   Shop,
   OrderDetails
 } from "../pages/index.js";
-import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, DeliveryBoys, Coupons, ReturnsDashboard,Categories } from '../pages/dashboard/index.js'
-import { ProtectedRoute, AdminRoute } from "../components/index.js";
+
+// private admin pages............
+import { Root, CreateProduct, Customers, Dashboard, Notifications, Orders, Products, Settings, DeliveryBoys, Coupons, ReturnsDashboard, Categories } from '../pages/dashboard/index.js'
+
+// private Delivery boy pages...........
+import { Root as RiderRoot, Dashboard as RiderDashboard, Login as RiderLogin, Orders as RiderOrders } from '../pages/rider dashboard/index.js'
+
+// protected and admin routes..........
+import { ProtectedRoute, AdminRoute, RiderRoute } from "../components/index.js";
 
 const router = createBrowserRouter([
   {
@@ -144,11 +153,29 @@ const router = createBrowserRouter([
         path: "returns"
       },
       {
-        element:<Categories/>,
-        path:"categories"
+        element: <Categories />,
+        path: "categories"
       }
     ]
   },
+  {
+    element: <RiderLogin />,
+    path: "login-rider"
+  },
+  {
+    element: <RiderRoute><RiderRoot /></RiderRoute>,
+    path: "web-rider",
+    children: [
+      {
+        element: <RiderDashboard />,
+        path: ""
+      },
+      {
+        element: <RiderOrders />,
+        path: "orders"
+      }
+    ]
+  }
 ]);
 
 export default router;

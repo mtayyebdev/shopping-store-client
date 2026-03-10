@@ -15,6 +15,7 @@ import { getCarts } from "./store/publicSlices/CartSlice.jsx";
 import { getOrders } from "./store/publicSlices/OrderSlice.jsx";
 import { getReturns } from "./store/publicSlices/ReturnSlice.jsx";
 import { getWishlist } from "./store/publicSlices/WishlistSlice.jsx";
+import { getDeliveryBoy, getAssignedOrders } from './store/publicSlices/DeliveryBoySlice.jsx'
 
 // get admin data...
 import { getCategories as AdminCategories } from './store/adminSlices/CategorySlice.jsx'
@@ -23,10 +24,14 @@ import { getUsers as AdminUsers } from "./store/adminSlices/UsersSlice.jsx";
 import { getOrders as AdminOrders } from "./store/adminSlices/OrdersSlice.jsx";
 import { getReturns as AdminReturns } from "./store/adminSlices/ReturnsSlice.jsx";
 import { getProducts as AdminProducts } from "./store/adminSlices/ProductsSlice.jsx";
+import { getRiders as AdminRiders } from './store/adminSlices/DeliveryBoySlice.jsx'
+import { getPaymentSetting as AdminPaymentSetting } from './store/adminSlices/PaymentSettingSlice.jsx'
+import { getStoreSetting as AdminStoreSetting } from './store/adminSlices/StoreSettingSlice.jsx'
 
 function GlobalDataLoader({ children }) {
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.userSlice);
+  const { isLoggedIn: riderLoggedIn } = useSelector((state) => state.deliveryBoySlice)
 
   useEffect(() => {
     const data = {
@@ -41,6 +46,14 @@ function GlobalDataLoader({ children }) {
   }, [])
 
   useEffect(() => {
+    dispatch(getDeliveryBoy());
+
+    if (riderLoggedIn) {
+      dispatch(getAssignedOrders({ page: 1, limit: 15, search: "" }))
+    }
+  }, [dispatch, riderLoggedIn])
+
+  useEffect(() => {
     dispatch(getUser());
 
     if (isLoggedIn) {
@@ -51,12 +64,15 @@ function GlobalDataLoader({ children }) {
     }
 
     if (isLoggedIn && user?.role === "admin") {
-      dispatch(AdminCategories({ page: 1, limit: 15, search: "" }))
-      dispatch(AdminCoupons({ page: 1, limit: 15, search: "" }))
-      dispatch(AdminOrders({ page: 1, limit: 15, search: "" }))
-      dispatch(AdminProducts({ page: 1, limit: 15, searchName: "" }))
-      dispatch(AdminReturns({ page: 1, limit: 15, search: "" }))
-      dispatch(AdminUsers({ page: 1, limit: 15, search: "" }))
+      dispatch(AdminCategories({ page: 1, limit: 15, search: "" }));
+      dispatch(AdminCoupons({ page: 1, limit: 15, search: "" }));
+      dispatch(AdminOrders({ page: 1, limit: 15, search: "" }));
+      dispatch(AdminProducts({ page: 1, limit: 15, searchName: "" }));
+      dispatch(AdminReturns({ page: 1, limit: 15, search: "" }));
+      dispatch(AdminUsers({ page: 1, limit: 15, search: "" }));
+      dispatch(AdminRiders({ page: 1, limit: 15, search: "" }));
+      dispatch(AdminPaymentSetting());
+      dispatch(AdminStoreSetting());
     }
   }, [dispatch, isLoggedIn]);
 

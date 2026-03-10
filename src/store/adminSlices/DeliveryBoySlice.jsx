@@ -15,7 +15,7 @@ export const getRider = createAsyncThunk("getrider", async (riderId, { rejectWit
         const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/rider/admin/get-deliveryboy/${riderId}`, { withCredentials: true });
         return res.data;
     } catch (error) {
-        return rejectWithValue(error?.message || error?.response?.data)
+        return rejectWithValue(error.response?.data || error.message)
     }
 })
 
@@ -24,7 +24,7 @@ export const createRider = createAsyncThunk("createrider", async (data, { reject
         const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/rider/admin/create`, data, { withCredentials: true });
         return res.data;
     } catch (error) {
-        return rejectWithValue(error?.message || error?.response?.data)
+        return rejectWithValue(error.response?.data || error.message)
     }
 })
 
@@ -33,7 +33,7 @@ export const updateRider = createAsyncThunk("updaterider", async ({ riderId, rid
         const res = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/api/rider/admin/update/${riderId}`, riderData, { withCredentials: true });
         return res.data;
     } catch (error) {
-        return rejectWithValue(error?.message || error?.response?.data)
+        return rejectWithValue(error.response?.data || error.message)
     }
 })
 
@@ -42,16 +42,16 @@ export const deleteRider = createAsyncThunk("deleterider", async (riderId, { rej
         const res = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/api/rider/admin/delete/${riderId}`, { withCredentials: true });
         return res.data;
     } catch (error) {
-        return rejectWithValue(error?.message || error?.response?.data)
+        return rejectWithValue(error.response?.data || error.message)
     }
 })
 
 export const updateRiderActionStatus = createAsyncThunk("updaterideractionstatus", async ({ riderId, actionStatus }, { rejectWithValue }) => {
     try {
-        const res = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/api/rider/admin/update-actionstatus/${riderId}`, actionStatus, { withCredentials: true });
+        const res = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/api/rider/admin/update-actionstatus/${riderId}`, {actionStatus}, { withCredentials: true });
         return res.data;
     } catch (error) {
-        return rejectWithValue(error?.message || error?.response?.data)
+        return rejectWithValue(error.response?.data || error.message)
     }
 })
 
@@ -80,10 +80,10 @@ const DeliveryBoySlice = createSlice({
                 state.riders = data?.data;
                 state.totalPages = data?.totalPages;
                 state.totalDeliveryBoys = data?.totalDeliveryBoys;
-                state.totalRiders = data?.state?.totalRiders;
-                state.activeRiders = data?.state?.activeRiders;
-                state.busyRiders = data?.state?.busyRiders;
-                state.suspendedRiders = data?.state?.suspendedRiders;
+                state.totalRiders = data?.stats?.totalRiders;
+                state.activeRiders = data?.stats?.activeRiders;
+                state.busyRiders = data?.stats?.busyRiders;
+                state.suspendedRiders = data?.stats?.suspendedRiders;
 
                 state.loading = false;
                 state.err = null;

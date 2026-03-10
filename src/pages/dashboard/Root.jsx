@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Sidebar, Header } from './components/index.js'
 import { Outlet } from 'react-router-dom';
 
-function Dashboard() {
+function Root() {
   const [sidebarToggle, setSidebarToggle] = useState(false);
   return (
     <>
@@ -31,4 +31,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard
+export default Root
